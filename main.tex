@@ -1,0 +1,228 @@
+\documentclass[10pt]{article} % for long documents
+
+\linespread{1.5}
+
+
+%% Defining the language for the document
+\usepackage[french]{babel}
+\usepackage[french]{isodate}
+\usepackage{mathtools}
+\usepackage{float}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+
+\usepackage{imta_core}
+\usepackage{imta_extra}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{csquotes}
+\usepackage{subcaption}
+\usepackage{pgfgantt}
+\usepackage{xltabular}
+\usepackage{longtable} % (chargé par xltabular, mais ok)
+\usepackage{array}
+\setlength{\parskip}{0pt}         % pas d'espace entre paragraphes dans les cellules
+\renewcommand{\arraystretch}{0.80}% ligne un peu plus serrée
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X} % colonnes paragraphes qui s'étirent
+
+
+\usepackage[round-mode=places, round-precision=0, group-separator={\ }, output-decimal-marker={.}, group-minimum-digits=3]{siunitx}
+
+
+%% Addtionnal packages can be loaded here
+\usepackage{url}
+%% for a complete and flexible bibliography
+\usepackage[
+backend=biber,
+sorting=none
+]{biblatex}
+
+\usepackage{graphicx}
+
+%\addbibresource{reference.bib}
+
+
+\cleanlookdateon % formats date according to the loaded language from now on
+
+\begin{document}
+
+%% General informations
+\author{BOULARD Gaëtan, CORDIER Léandre, JULLIERE Thomas, RAMSIS Zainab, \\ RANNOU Mathieu}
+\imtaAuthorShort{}
+\imtaSuperviser{
+Sujet : Imageur 3D   \hskip 3cm   Groupe 1\\
+}
+\date{\noexpand\today} % automatically print today's date, can be redefined using \date{<date>}
+\title{UE Pronto - NA1\_rapport\_final\_PRONTO\_26}
+%\imtaVersion{<version>}
+
+%Add extra other companies' logo
+%If needed, options can be passed to the underlying \includegraphics by calling 
+%\imtaAddPartnerLogo{}
+
+%\imtaSetIMTStyle % Sets font and headers/footers according to the IMT Atlantique style guidelines
+
+
+% front cover
+\imtaMaketitlepage
+\newpage
+
+\tableofcontents
+
+
+
+
+\section{Introduction}
+
+\subsection{Contexte}
+
+Le domaine de la métrologie optique a été révolutionné par l'imagerie par illumination structurée, une technique de mesure 3D sans contact permettant de modéliser des surfaces avec une précision et une rapidité croissantes. L'objectif de ce projet est de concevoir un imageur 3D dédié aux objets de grandes dimensions, allant de 1 à 4 m², afin de répondre aux besoins de secteurs industriels tels que l'aéronautique ou le nautisme.
+
+Pour ce faire, nous utilisons la technologie binaire, qui présente l'avantage de réduire considérablement le nombre d'images nécessaires à la reconstruction par rapport aux méthodes classiques. Ce choix technique permet de minimiser les capacités de stockage requises et d'accélérer le traitement informatique des données. Enfin, notre démarche s'inscrit dans une logique de faible coût, en utilisant des composants grand public comme un vidéoprojecteur et une caméra standard, nous visons une résolution de 1 mm.
+
+Le principe consiste à projeter successivement une série de $N$ trames binaires
+depuis le vidéoprojecteur. Chaque trame possède une fréquence spatiale croissante,
+permettant d’identifier de manière unique chaque position éclairée sur l’objet.
+
+Après une étape préalable de calibration du système projecteur--caméra,
+chaque point observé par la caméra reçoit une succession d’intensités lumineuses
+(blanc ou noir) au cours des différentes projections.
+La succession de ces états forme alors un \textbf{mot binaire}
+permettant d’identifier la frange incidente associée à ce point.
+
+Ainsi, pour $N$ projections binaires, il devient possible de coder jusqu’à
+$2^{N}$ positions distinctes du projecteur.
+La correspondance entre pixels caméra et pixels projecteur peut alors être établie,
+permettant la reconstruction tridimensionnelle par triangulation.
+
+\subsection{Objectifs}
+
+L'objectif de ce projet est l’étude et la réalisation d’un imageur tridimensionnel pour objets de grandes tailles.
+Le projet sera réalisé en deux étapes : dans un premier temps nous avons fait une étude théorique ainsi qu'une simulation numérique afin d'établir les relations mathématiques et de créer les codes de traitement des images. Puis nous avons réaliser un système physique (avec un projecteur et une caméra), et créé une interface graphique. Nous voulions aussi imprimer en 3D l’objet reconstruit à échelle réduite.
+
+Notre capteur doit être en mesure de mesurer de grands objets de $1$ à $4\,m^2$ avec une résolution minimale de $ 1$ mm.
+De plus, la mesure se fera sans contact, avec la projection d'une série d'image sur un objet, et la mesure des rayons réfléchis.
+Enfin, la calibration du capteur devra se faire de manière automatique à partir d'images prisent sur un damier. 
+
+\section{Fonctionnalités à développer}
+
+Le système d'imagerie 3D par illumination structurée repose sur un enchaînement rigoureux de fonctionnalités logicielles et matérielles. L'objectif principal est de piloter l'acquisition, d'assurer une transformation exacte des coordonnées pixels vers l'espace métrique, et de restituer un modèle 3D exploitable par l'utilisateur[cite: 45, 70]. 
+
+\subsection{Acquisition automatique et séquencement des données}
+Le processus d'acquisition doit garantir la parfaite synchronisation entre le vidéoprojecteur (émetteur) et la webcam (récepteur)[cite: 17, 54].
+\begin{itemize}
+    \item \textbf{Génération et Projection des Trames :} Le système génère de manière automatique une séquence de $N = 10$ trames binaires[cite: 27, 55]. Chaque image se présente sous la forme d'une matrice binaire de résolution native $1280 \times 800$ pixels (propre au vidéoprojecteur EPSON EB-W49)[cite: 27, 56]. Ces trames, exportées au format PNG 8-bit non compressé pour éviter tout flou de transition sur les franges, sont transmises en plein écran via une liaison HDMI[cite: 57, 58].
+    \item \textbf{Capture et Contrôle Caméra :} Parallèlement à la projection, la webcam Logitech C920e capture la réflexion des franges sur l'objet[cite: 17, 58]. Afin d'éviter les biais d'exposition ou de mise au point automatique qui dégraderaient le traitement, les paramètres de capture (temps d'exposition, gain, balance des blancs) sont entièrement verrouillés et pilotés via la bibliothèque OpenCV[cite: 59]. Les images acquises en résolution $1920 \times 1080$ pixels sont instantanément vectorisées sous forme de tenseurs multidimensionnels pour optimiser la vitesse de traitement[cite: 26, 59].
+\end{itemize}
+
+\subsection{Traitement du signal et binarisation dynamique}
+Pour passer de l'image brute à une matrice logique exploitable, les fonctionnalités suivantes de nettoyage des données sont appliquées[cite: 60]:
+\begin{itemize}
+    \item \textbf{Filtrage du bruit :} Application d'un filtre spatial basse-bas pour éliminer le bruit haute fréquence inhérent au capteur de la caméra[cite: 61].
+    \item \textbf{Seuillage adaptatif :} Afin de contrer les variations d'albédo de l'objet ou la dispersion de l'énergie lumineuse due au recul important du projecteur, le logiciel calcule dynamiquement un seuil optimal (méthode de maximisation de la variance inter-classe)[cite: 39, 41, 62]. Cela permet de séparer fidèlement les zones éclairées (1) des zones sombres (0), même sur des objets de géométrie complexe ou de couleur sombre[cite: 63, 65].
+\end{itemize}
+
+\subsection{Calibration automatique du système}
+La calibration est la brique logicielle critique permettant de lier les coordonnées bidimensionnelles des capteurs aux mesures métriques réelles[cite: 70].
+\begin{itemize}
+    \item \textbf{Calibration du Récepteur :} À partir de la capture d'un damier de référence positionné à des profondeurs connues, l'algorithme détecte les points d'intersection[cite: 71]. En résolvant un système d'équations homogènes s'appuyant sur au moins 6 points de référence, le programme extrait la matrice de projection perspective normalisée du récepteur ($M_{RN}$), modélisant ses paramètres intrinsèques et extrinsèques[cite: 71, 74].
+    \item \textbf{Calibration de l'Émetteur :} À l'aide d'une méthode indirecte, le projecteur affiche une mire numérique sur le plan du damier[cite: 76]. Les points identifiés par la caméra permettent, par intersection de rayons optiques et triangulation avec le plan physique, de calculer la matrice de projection perspective normalisée de l'émetteur ($M_{EN}$)[cite: 75, 78].
+\end{itemize}
+
+\subsection{Reconstruction tridimensionnelle par triangulation}
+Une fois les images nettoyées et le système calibré, l'imageur traite la géométrie de l'objet[cite: 70, 84]:
+\begin{itemize}
+    \item \textbf{Génération de la matrice de localisation $L_C$ :} Pour chaque pixel $(u_R, v_R)$ de la caméra, la succession temporelle des états lumineux (noir ou blanc) est convertie en un mot binaire unique[cite: 14, 65]. La formule de sommation calcule l'indice de frange correspondant:
+    \begin{equation}
+        C(u_R, v_R) = \sum_{k=0}^{N-1} M_k(u_R, v_R) \cdot 2^{N-1-k}
+    \end{equation}
+    \item \textbf{Identification de l'abscisse émetteur $v_E$ :} Cet indice de frange $C$ permet d'isoler de manière unique la coordonnée horizontale $v_E$ sur le panneau LCD du vidéoprojecteur[cite: 66, 67].
+    \item \textbf{Résolution du système :} Pour chaque pixel d'intérêt, le triplet $(u_R, v_R, v_E)$ est injecté dans un système de trois équations à trois inconnues linéaires dépendant des matrices $M_{RN}$ et $M_{EN}$[cite: 68, 69]. Sa résolution directe engendre un nuage de points 3D $(X, Y, Z)$ représentant fidèlement la surface de l'objet[cite: 69].
+\end{itemize}
+
+\subsection{Interface Graphique Utilisateur (IHM)}
+Pour rendre le système maniable et masquer la complexité mathématique sous-jacente, l'interface graphique en C\# .NET centralise les fonctionnalités utilisateur suivantes[cite: 45, 87]:
+\begin{itemize}
+    \item \textbf{Retour vidéo en temps réel :} Permet à l'opérateur d'ajuster le cadrage, de vérifier l'éclairage ambiant et de s'assurer de la bonne couverture du champ de projection[cite: 88].
+    \item \textbf{Automatisation et Suivi :} Un panneau de configuration permet de définir le nombre d'images, de lancer séquentiellement la calibration ou la mesure en un seul clic, tout en affichant une barre de progression claire de l'acquisition[cite: 89].
+    \item \textbf{Gestion des erreurs :} En cas de mauvaise détection du damier ou de contraste insuffisant des franges, l'interface lève une alerte explicite guidant l'utilisateur pour corriger le problème[cite: 46, 90].
+    \item \textbf{Visualisation 3D interactive :} Intégration d'un module d'affichage tridimensionnel permettant de manipuler le nuage de points généré (fonctions de rotation, translation et zoom) avec application éventuelle d'une texture ou d'un codage couleur selon le relief[cite: 93, 94, 95].
+\end{itemize}
+
+\subsection{Sauvegarde et Exportabilité des données}
+Le logiciel intègre des fonctions de gestion de fichiers garantissant la reproductibilité des mesures[cite: 96]:
+\begin{itemize}
+    \item \textbf{Sauvegarde de la configuration :} Exportation des coefficients des matrices de calibration ($M_{RN}$ et $M_{EN}$) dans un format de fichier léger (ex: texte ou XML), permettant à l'utilisateur de charger une calibration existante lors de mesures ultérieures sans répéter le processus de ciblage[cite: 99, 100].
+    \item \textbf{Export du modèle 3D :} Restitue le nuage de points ou le maillage final dans un format standardisé et ouvert (tel que .PLY ou .OBJ), nativement compatible avec les logiciels de CAO ou les trancheurs d'impression 3D pour la fabrication à échelle réduite[cite: 50, 101, 102].
+\end{itemize}
+
+\section{Conception}
+\subsection{Architecture du code}
+
+\subsection{Interface graphique}
+L'objectif de la création de l'interface graphique est de simplifier au maximum les différentes étapes nécessaires à la modélisation d'un objet en étant le plus lisible possible pour l'utilisateur. Nous avons donc d'abord déterminer ce dont l'utilisateur avait besoin pour suivre les étapes de reconstruction de l'objet :
+\begin{itemize}
+    \item L'utilisateur doit avoir un retour de la caméra pour être capable de cadrer l'objet.
+    \item Il doit pouvoir lancer la calibration manuellement et avoir un retour sur le fonctionnement.
+    \item L'utilisateur doit être capable de voir la reconstruction de l'objet.
+    \item Il doit pouvoir déterminer manuellement le nombre d'images à prendre .
+    \item L'utilisateur doit pouvoir enregistrer les résultats facilement.
+\end{itemize}
+Nous avons choisi de coder l'interface en C\# en utilisant le framework .NET sur visual studio car le framework est simple d'utilisation et qu'un membre de notre équipe l'avait déjà utilisé.
+
+\subsection{objet support}
+L'objectif de la création du support est de simplifier au maximum les différentes étapes nécessaires à la calibration récepeteur et émetteur. Nous avons donc d'abord déterminer ce dont l'utilisateur avait besoin pour effectuer les étapes de calibration de l'objet :
+\begin{itemize}
+    \item L'insertion du damier dans le support doit être simple et rapide.
+    \item Une fois inséré, le support doit être parfaitement stable.
+    \item L'écart entre les deux postions du support doit être exactement de 10 cm.
+\end{itemize}
+Nous avons choisi de réaliser le support en utilisant le logiciel fusion 360, pour pouvoir ensuite l'imprimer en 3D.
+
+
+\section{Développement}
+\subsection{Interface graphique}
+Nous avons commencé à faire l'interface graphique assez tôt car nous terminions en parallèle les codes de reconstruction d'objet et de calibration . Lors du développement nous avons fait certains choix, nous avons mis un slider
+
+\section{Intégration et validation}
+
+\section{clôture du projet}
+
+\section{Retour d'expérience}
+
+\section{Bibliographie}
+
+\textbf{Documentations et Notices Techniques}
+
+\begin{itemize}
+    \item \textbf{Logitech}, \textit{C920e HD WEBCAM : Complete Setup Guide}.
+    \item \textbf{Epson}, \textit{Notice technique et spécifications – Modèle 647383}.
+\end{itemize}
+\textbf{Références de Projet et Cours}
+
+\begin{itemize}
+    \item \textbf{SERVAGENT N., LYS E.}, \textit{Imageur 3D à code binaire}, Révisions R9 \& R13, 2024.
+    \item \textbf{Équipe Projet}, \textit{Présentation IM-3D : Spécifications et déploiement}.
+\end{itemize}
+\textbf{Ressources Théoriques}
+
+\textit{Introduction aux principes du code binaire et structuration des données.}
+
+ 
+\section{Annexes}
+
+\subsection{Calculs}
+
+\subsection{Codes}
+
+\subsection*{Retours d'expériences individuels}
+
+\subsubsection*{Boulard Gaëtan}
+
+Le projet fut très instructif, j'ai beaucoup appris sur le plan technique et humain. En effet, ce projet m'a demandé d'acquérir des compétences scientifiques (particulièrement en mathématiques) de pointe, telle qu'une compréhension avancée des matrices de projection. Mais c'est l'ambiance globale du groupe qui m'a le plus marqué, j'ai été agréablement surpris de la dévotion de mes camarades en ce projet, j'ai rarement vu un groupe où tout le monde travaille de manière équivalente et où la parole est à ce point libre. Globalement un très bon groupe, je serais ravi de faire un nouveau projet avec eux.
+\\
+
+    Nous avons rencontré un problème pendant la phase de calibration, nous déplacions le damier à la main. C'était beaucoup trop approximatif et cela faussait la précision de nos mesures. Pour régler ce problème, j'ai conçu et imprimé en 3D un système de supports spécifiques. L'idée est d'en placer deux de chaque côté du damier pour bien le caler. J'ai configuré ces supports avec deux positions fixes, une arrière et une avant, qui bloquent complètement les mouvements de rotation ou les écarts sur les côtés. Cela permet de faire glisser le damier d'une position à l'autre pour obtenir une translation parfaite de 10 centimètres vers l'avant. Grâce à cela, nous avons supprimé l'erreur humaine : le mouvement est devenu 100\% répétable et le déplacement lors de la calibration est maintenant d'une précision parfaite.
+
+\end{document}
