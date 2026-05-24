@@ -51,10 +51,10 @@ sorting=none
 \author{BOULARD Gaëtan, CORDIER Léandre, JULLIERE Thomas, RAMSIS Zainab, \\ RANNOU Mathieu}
 \imtaAuthorShort{}
 \imtaSuperviser{
-Sujet : Imageur 3D   \hskip 3cm   Groupe 1\\
+Sujet : Imageur 3D - \textbf{Nantes}  \hskip 3cm   Groupe 1\\
 }
 \date{\noexpand\today} % automatically print today's date, can be redefined using \date{<date>}
-\title{UE Pronto - NA1\_rapport\_final\_PRONTO\_26}
+\title{UE Pronto - Rapport Final 2026}
 %\imtaVersion{<version>}
 
 %Add extra other companies' logo
@@ -107,59 +107,78 @@ Enfin, la calibration du capteur devra se faire de manière automatique à parti
 
 \section{Fonctionnalités à développer}
 
-Le système d'imagerie 3D par illumination structurée repose sur un enchaînement rigoureux de fonctionnalités logicielles et matérielles. L'objectif principal est de piloter l'acquisition, d'assurer une transformation exacte des coordonnées pixels vers l'espace métrique, et de restituer un modèle 3D exploitable par l'utilisateur[cite: 45, 70]. 
+Le système d'imagerie 3D par illumination structurée repose sur un enchaînement rigoureux de fonctionnalités logicielles et matérielles. L'objectif principal est de piloter l'acquisition, d'assurer une transformation exacte des coordonnées pixels vers l'espace métrique, et de restituer un modèle 3D exploitable par l'utilisateur. 
 
 \subsection{Acquisition automatique et séquencement des données}
-Le processus d'acquisition doit garantir la parfaite synchronisation entre le vidéoprojecteur (émetteur) et la webcam (récepteur)[cite: 17, 54].
+Le processus d'acquisition doit garantir la parfaite synchronisation entre le vidéoprojecteur (émetteur) et la webcam (récepteur).
 \begin{itemize}
-    \item \textbf{Génération et Projection des Trames :} Le système génère de manière automatique une séquence de $N = 10$ trames binaires[cite: 27, 55]. Chaque image se présente sous la forme d'une matrice binaire de résolution native $1280 \times 800$ pixels (propre au vidéoprojecteur EPSON EB-W49)[cite: 27, 56]. Ces trames, exportées au format PNG 8-bit non compressé pour éviter tout flou de transition sur les franges, sont transmises en plein écran via une liaison HDMI[cite: 57, 58].
-    \item \textbf{Capture et Contrôle Caméra :} Parallèlement à la projection, la webcam Logitech C920e capture la réflexion des franges sur l'objet[cite: 17, 58]. Afin d'éviter les biais d'exposition ou de mise au point automatique qui dégraderaient le traitement, les paramètres de capture (temps d'exposition, gain, balance des blancs) sont entièrement verrouillés et pilotés via la bibliothèque OpenCV[cite: 59]. Les images acquises en résolution $1920 \times 1080$ pixels sont instantanément vectorisées sous forme de tenseurs multidimensionnels pour optimiser la vitesse de traitement[cite: 26, 59].
+    \item \textbf{Génération et Projection des Trames :} Le système génère de manière automatique une séquence de $N = 10$ trames binaires. Chaque image se présente sous la forme d'une matrice binaire de résolution native $1280 \times 800$ pixels (propre au vidéoprojecteur EPSON EB-W49). Ces trames, exportées au format PNG 8-bit non compressé pour éviter tout flou de transition sur les franges, sont transmises en plein écran via une liaison HDMI.
+    \item \textbf{Capture et Contrôle Caméra :} Parallèlement à la projection, la webcam Logitech C920e capture la réflexion des franges sur l'objet. Afin d'éviter les biais d'exposition ou de mise au point automatique qui dégraderaient le traitement, les paramètres de capture (temps d'exposition, gain, balance des blancs) sont entièrement verrouillés et pilotés via la bibliothèque OpenCV. Les images acquises en résolution $1920 \times 1080$ pixels sont instantanément vectorisées sous forme de tenseurs multidimensionnels pour optimiser la vitesse de traitement.
 \end{itemize}
 
 \subsection{Traitement du signal et binarisation dynamique}
-Pour passer de l'image brute à une matrice logique exploitable, les fonctionnalités suivantes de nettoyage des données sont appliquées[cite: 60]:
+Pour passer de l'image brute à une matrice logique exploitable, les fonctionnalités suivantes de nettoyage des données sont appliquées :
 \begin{itemize}
-    \item \textbf{Filtrage du bruit :} Application d'un filtre spatial basse-bas pour éliminer le bruit haute fréquence inhérent au capteur de la caméra[cite: 61].
-    \item \textbf{Seuillage adaptatif :} Afin de contrer les variations d'albédo de l'objet ou la dispersion de l'énergie lumineuse due au recul important du projecteur, le logiciel calcule dynamiquement un seuil optimal (méthode de maximisation de la variance inter-classe)[cite: 39, 41, 62]. Cela permet de séparer fidèlement les zones éclairées (1) des zones sombres (0), même sur des objets de géométrie complexe ou de couleur sombre[cite: 63, 65].
+    \item \textbf{Filtrage du bruit :} Application d'un filtre spatial basse-bas pour éliminer le bruit haute fréquence inhérent au capteur de la caméra.
+    \item \textbf{Seuillage adaptatif :} Afin de contrer les variations d'albédo de l'objet ou la dispersion de l'énergie lumineuse due au recul important du projecteur, le logiciel calcule dynamiquement un seuil optimal (méthode de maximisation de la variance inter-classe). Cela permet de séparer fidèlement les zones éclairées (1) des zones sombres (0), même sur des objets de géométrie complexe ou de couleur sombre.
+    \item \textbf{Masque manuel}
+    Afin de faciliter le traitement des images via nos codes, nous avons choisi d'appliquer manuellement un masque autour de celles-ci. Cette étape est détaillée ici \textbf{COMPLETER IMPORTANT IMPORTANT}
 \end{itemize}
 
 \subsection{Calibration automatique du système}
-La calibration est la brique logicielle critique permettant de lier les coordonnées bidimensionnelles des capteurs aux mesures métriques réelles[cite: 70].
+La calibration est la brique logicielle critique permettant de lier les coordonnées bidimensionnelles des capteurs aux mesures métriques réelles.
 \begin{itemize}
-    \item \textbf{Calibration du Récepteur :} À partir de la capture d'un damier de référence positionné à des profondeurs connues, l'algorithme détecte les points d'intersection[cite: 71]. En résolvant un système d'équations homogènes s'appuyant sur au moins 6 points de référence, le programme extrait la matrice de projection perspective normalisée du récepteur ($M_{RN}$), modélisant ses paramètres intrinsèques et extrinsèques[cite: 71, 74].
-    \item \textbf{Calibration de l'Émetteur :} À l'aide d'une méthode indirecte, le projecteur affiche une mire numérique sur le plan du damier[cite: 76]. Les points identifiés par la caméra permettent, par intersection de rayons optiques et triangulation avec le plan physique, de calculer la matrice de projection perspective normalisée de l'émetteur ($M_{EN}$)[cite: 75, 78].
+    \item \textbf{Calibration du Récepteur :} À partir de la capture d'un damier de référence positionné à des profondeurs connues, l'algorithme détecte les points d'intersection. En résolvant un système d'équations homogènes s'appuyant sur au moins 6 points de référence, le programme extrait la matrice de projection perspective normalisée du récepteur ($M_{RN}$), modélisant ses paramètres intrinsèques et extrinsèques.
+    \item \textbf{Calibration de l'Émetteur :} À l'aide d'une méthode indirecte, le projecteur affiche une mire numérique sur le plan du damier. Les points identifiés par la caméra permettent, par intersection de rayons optiques et triangulation avec le plan physique, de calculer la matrice de projection perspective normalisée de l'émetteur ($M_{EN}$).
 \end{itemize}
 
 \subsection{Reconstruction tridimensionnelle par triangulation}
-Une fois les images nettoyées et le système calibré, l'imageur traite la géométrie de l'objet[cite: 70, 84]:
+Une fois les images nettoyées et le système calibré, l'imageur traite la géométrie de l'objet:
 \begin{itemize}
-    \item \textbf{Génération de la matrice de localisation $L_C$ :} Pour chaque pixel $(u_R, v_R)$ de la caméra, la succession temporelle des états lumineux (noir ou blanc) est convertie en un mot binaire unique[cite: 14, 65]. La formule de sommation calcule l'indice de frange correspondant:
+    \item \textbf{Génération de la matrice de localisation $L_C$ :} Pour chaque pixel $(u_R, v_R)$ de la caméra, la succession temporelle des états lumineux (noir ou blanc) est convertie en un mot binaire unique. La formule de sommation calcule l'indice de frange correspondant:
     \begin{equation}
         C(u_R, v_R) = \sum_{k=0}^{N-1} M_k(u_R, v_R) \cdot 2^{N-1-k}
     \end{equation}
-    \item \textbf{Identification de l'abscisse émetteur $v_E$ :} Cet indice de frange $C$ permet d'isoler de manière unique la coordonnée horizontale $v_E$ sur le panneau LCD du vidéoprojecteur[cite: 66, 67].
-    \item \textbf{Résolution du système :} Pour chaque pixel d'intérêt, le triplet $(u_R, v_R, v_E)$ est injecté dans un système de trois équations à trois inconnues linéaires dépendant des matrices $M_{RN}$ et $M_{EN}$[cite: 68, 69]. Sa résolution directe engendre un nuage de points 3D $(X, Y, Z)$ représentant fidèlement la surface de l'objet[cite: 69].
+    \item \textbf{Identification de l'abscisse émetteur $v_E$ :} Cet indice de frange $C$ permet d'isoler de manière unique la coordonnée horizontale $v_E$ sur le panneau LCD du vidéoprojecteur.
+    \item \textbf{Résolution du système :} Pour chaque pixel d'intérêt, le triplet $(u_R, v_R, v_E)$ est injecté dans un système de trois équations à trois inconnues linéaires dépendant des matrices $M_{RN}$ et $M_{EN}$. Sa résolution directe engendre un nuage de points 3D $(X, Y, Z)$ représentant fidèlement la surface de l'objet.
 \end{itemize}
 
 \subsection{Interface Graphique Utilisateur (IHM)}
-Pour rendre le système maniable et masquer la complexité mathématique sous-jacente, l'interface graphique en C\# .NET centralise les fonctionnalités utilisateur suivantes[cite: 45, 87]:
+Pour rendre le système maniable et masquer la complexité mathématique sous-jacente, l'interface graphique en C\# utilisant le framework .NET centralise les fonctionnalités utilisateur suivantes:
 \begin{itemize}
-    \item \textbf{Retour vidéo en temps réel :} Permet à l'opérateur d'ajuster le cadrage, de vérifier l'éclairage ambiant et de s'assurer de la bonne couverture du champ de projection[cite: 88].
-    \item \textbf{Automatisation et Suivi :} Un panneau de configuration permet de définir le nombre d'images, de lancer séquentiellement la calibration ou la mesure en un seul clic, tout en affichant une barre de progression claire de l'acquisition[cite: 89].
-    \item \textbf{Gestion des erreurs :} En cas de mauvaise détection du damier ou de contraste insuffisant des franges, l'interface lève une alerte explicite guidant l'utilisateur pour corriger le problème[cite: 46, 90].
-    \item \textbf{Visualisation 3D interactive :} Intégration d'un module d'affichage tridimensionnel permettant de manipuler le nuage de points généré (fonctions de rotation, translation et zoom) avec application éventuelle d'une texture ou d'un codage couleur selon le relief[cite: 93, 94, 95].
+    \item \textbf{Retour vidéo en temps réel :} Permet à l'opérateur d'ajuster le cadrage, de vérifier l'éclairage ambiant et de s'assurer de la bonne couverture du champ de projection.
+    \item \textbf{Automatisation et Suivi :} Un panneau de configuration permet de définir le nombre d'images, de lancer séquentiellement la calibration ou la mesure en un seul clic, tout en affichant une barre de progression claire de l'acquisition.
+    \item \textbf{Gestion des erreurs :} En cas de mauvaise détection du damier ou de contraste insuffisant des franges, l'interface lève une alerte explicite guidant l'utilisateur pour corriger le problème.
+    \item \textbf{Visualisation 3D interactive :} Intégration d'un module d'affichage tridimensionnel permettant de manipuler le nuage de points généré (fonctions de rotation, translation et zoom) avec application éventuelle d'une texture ou d'un codage couleur selon le relief.
 \end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \makebox[\linewidth][c]{%
+        \includegraphics[width=1.15\linewidth]{interface.png}%
+    }
+    \caption{Capture d'écran de l'interface graphique}
+    \label{fig:interface}
+\end{figure}
+
 \subsection{Sauvegarde et Exportabilité des données}
-Le logiciel intègre des fonctions de gestion de fichiers garantissant la reproductibilité des mesures[cite: 96]:
+Le logiciel intègre des fonctions de gestion de fichiers garantissant la reproductibilité des mesures:
 \begin{itemize}
-    \item \textbf{Sauvegarde de la configuration :} Exportation des coefficients des matrices de calibration ($M_{RN}$ et $M_{EN}$) dans un format de fichier léger (ex: texte ou XML), permettant à l'utilisateur de charger une calibration existante lors de mesures ultérieures sans répéter le processus de ciblage[cite: 99, 100].
-    \item \textbf{Export du modèle 3D :} Restitue le nuage de points ou le maillage final dans un format standardisé et ouvert (tel que .PLY ou .OBJ), nativement compatible avec les logiciels de CAO ou les trancheurs d'impression 3D pour la fabrication à échelle réduite[cite: 50, 101, 102].
+    \item \textbf{Sauvegarde de la configuration :} Exportation des coefficients des matrices de calibration ($M_{RN}$ et $M_{EN}$) dans un format de fichier léger (ex: texte ou XML), permettant à l'utilisateur de charger une calibration existante lors de mesures ultérieures sans répéter le processus de ciblage.
+    \item \textbf{Export du modèle 3D :} Restitue le nuage de points ou le maillage final dans un format standardisé et ouvert (tel que .PLY ou .OBJ), nativement compatible avec les logiciels de CAO ou les trancheurs d'impression 3D pour la fabrication à échelle réduite.
 \end{itemize}
 
 \section{Conception}
+\section{Code}
 \subsection{Architecture du code}
-
+\begin{figure}[H]
+    \centering
+    \makebox[\linewidth][c]{%
+        \includegraphics[width=1.15\linewidth]{architecture_code.pdf}
+    }
+    \caption{Architecture du code permettant la reconstruction d'un ou plusieurs objets}
+    \label{fig:placeholder}
+\end{figure}
 \subsection{Interface graphique}
 L'objectif de la création de l'interface graphique est de simplifier au maximum les différentes étapes nécessaires à la modélisation d'un objet en étant le plus lisible possible pour l'utilisateur. Nous avons donc d'abord déterminer ce dont l'utilisateur avait besoin pour suivre les étapes de reconstruction de l'objet :
 \begin{itemize}
@@ -171,7 +190,7 @@ L'objectif de la création de l'interface graphique est de simplifier au maximum
 \end{itemize}
 Nous avons choisi de coder l'interface en C\# en utilisant le framework .NET sur visual studio car le framework est simple d'utilisation et qu'un membre de notre équipe l'avait déjà utilisé.
 
-\subsection{objet support}
+\subsection{Objet support}
 L'objectif de la création du support est de simplifier au maximum les différentes étapes nécessaires à la calibration récepeteur et émetteur. Nous avons donc d'abord déterminer ce dont l'utilisateur avait besoin pour effectuer les étapes de calibration de l'objet :
 \begin{itemize}
     \item L'insertion du damier dans le support doit être simple et rapide.
@@ -181,13 +200,35 @@ L'objectif de la création du support est de simplifier au maximum les différen
 Nous avons choisi de réaliser le support en utilisant le logiciel fusion 360, pour pouvoir ensuite l'imprimer en 3D.
 
 
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{WhatsApp Image 2026-05-23 at 21.50.05.jpeg}
+    \caption{Image d'un des supports imprimé}
+    \label{fig:placeholder}
+\end{figure}
+
+
 \section{Développement}
 \subsection{Interface graphique}
-Nous avons commencé à faire l'interface graphique assez tôt car nous terminions en parallèle les codes de reconstruction d'objet et de calibration . Lors du développement nous avons fait certains choix, nous avons mis un slider
+
+Nous avons commencé à faire l'interface graphique assez tôt car nous terminions en parallèle les codes de reconstruction d'objet et de calibration . Lors du développement nous avons fait certains choix, nous avons mis un slider pour que l'utilisateur puisse choisir le nombre d'image à prendre simplement.
+\\ Lors de nos premiers essais nous avons eu des difficultés avec la caméra car du scientillement aparaissait sur les images de la caméra, nous avons donc rajouter du codes pour avoir accès aux paramètres de la caméra depuisl'interface graphique, ce qui nous permet d'ajuster les paramètres de la caméra grâce au retour avant de commencer les expérimentations.
+\\Nous avons aussi fait des programmes python pour faire des images des franges à projetter avec l'émetteur, et avons implémenté dans l'interface la projection automatique de ces images pour accélérer la capture des images.
+\\Pour enregistrer les différentes images nous avons choisi d'utiliser des dossiers zip.
 
 \section{Intégration et validation}
+\subsection{Interface graphique}
+Lors du développement de l'interface nous avons rapidement testé les fonctionnalités liées à la caméra et au projecteur, car nous avons considérés ces fonctions comme les plus importantes. Une fois que le retour caméra et la projection ont été validé nous avons pu vérifier l'enregistrement pour nous assuré que l'interface soit utilisable.
+\\Une fois l'interface fonctionnelle nous l'avons utilisée pendant toutes les étapes suivantes du projet ce qui nous permis de gagner du temps sur les calibrations et les enregistrements d'images.
 
-\section{clôture du projet}
+\subsection{Validation de la calibration}
+Valider la calibration suppose deux étapes : vérifier dans un premier temps que le quadrillage est bien détecté
+
+\subsection{Validation de la reconstruction}
+
+\section{Clôture du projet}
 
 \section{Retour d'expérience}
 
