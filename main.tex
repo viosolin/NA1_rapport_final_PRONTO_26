@@ -8,6 +8,47 @@
 \usepackage[french]{isodate}
 \usepackage{mathtools}
 \usepackage{float}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{microtype}
+
+% Configuration de listings pour la coloration syntaxique du code Python
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolor}{rgb}{0.96,0.96,0.93}
+
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolor},   
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{blue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4,
+    frame=single,
+    frameround=tttt,
+    rulecolor=\color{lightgray}
+}
 
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc,fit}
@@ -107,6 +148,174 @@ Notre capteur doit être en mesure de mesurer de grands objets de $1$ à $4\,m^2
 De plus, la mesure se fera sans contact, avec la projection d'une série d'image sur un objet, et la mesure des rayons réfléchis.
 Enfin, la calibration du capteur devra se faire de manière automatique à partir d'images prisent sur un damier. 
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  >=Latex,
+  thick,
+  dim/.style={Latex-Latex, line width=0.9pt},
+  ray/.style={-Latex, line width=0.9pt},
+  soft/.style={fill=black!5},
+]
+
+% =========================
+% Paramètres (ajuste ici)
+% =========================
+\def\xL{-6.0}      % centre platine gauche (projecteur)
+\def\xR{ 6.0}      % centre platine droite (caméra)
+\def\y0{0.0}       % axe du banc
+\def\beamW{2.2}    % largeur du banc
+\def\plateR{1.1}   % rayon platines
+
+\def\yObj{2.3}     % <<< augmente l'angle : plus grand = triangle plus "ouvert"
+\def\objW{1.0}
+\def\objH{1.4}
+
+% =========================
+% Banc (vue de haut)
+% =========================
+\fill[soft] (-7.2,\y0-\beamW/2) rectangle (7.2,\y0+\beamW/2);
+\draw       (-7.2,\y0-\beamW/2) rectangle (7.2,\y0+\beamW/2);
+\node[below] at (0,\y0-\beamW/2) {\footnotesize Banc / support};
+
+% Platines
+\fill[orange!40] (\xL,\y0) circle (\plateR);
+\draw            (\xL,\y0) circle (\plateR);
+\fill[orange!40] (\xR,\y0) circle (\plateR);
+\draw            (\xR,\y0) circle (\plateR);
+
+% =========================
+% Points & angles
+% =========================
+\path (0,\yObj) coordinate (O);                % objet sur la médiatrice
+\path (\xL,\y0) coordinate (PL);               % centre platine gauche
+\path (\xR,\y0) coordinate (PR);               % centre platine droite
+
+% Points "optiques" (sortie projecteur / objectif caméra)
+\path (\xL+1.25,\y0) coordinate (Popt);
+\path (\xR-1.15,\y0) coordinate (Copt);
+
+% Angles pour pointer vers l'objet
+\path let \p1=(O), \p2=(Popt) in coordinate (tmp1) at (0,0);
+\pgfmathsetmacro{\angP}{atan2(\yObj-\y0, 0-(\xL+1.25))}   % direction projecteur -> objet
+\pgfmathsetmacro{\angC}{atan2(\yObj-\y0, 0-(\xR-1.15))}   % direction caméra   -> objet
+
+% =========================
+% Projecteur (orienté vers l'objet)
+% =========================
+\begin{scope}[shift={(PL)}, rotate=\angP]
+  % boîtier
+  \fill[green!35] (-1.4,-0.9) rectangle (1.4,0.9);
+  \draw            (-1.4,-0.9) rectangle (1.4,0.9);
+  % sortie (sur la "face avant")
+  \fill[green!15]  (1.15,0) circle (0.22);
+  \draw            (1.15,0) circle (0.22);
+  % petit repère direction
+  \draw[-Latex, line width=0.9pt] (0.2,0) -- (0.95,0);
+\end{scope}
+\node[above] at (\xL,\y0+1.35) {\footnotesize Projecteur};
+
+% =========================
+% Caméra (orientée vers l'objet)
+% =========================
+\begin{scope}[shift={(PR)}, rotate=\angC+180] % +180 pour que "l'avant" regarde vers l'objet
+  \fill[blue!30]  (-1.3,-0.8) rectangle (1.3,0.8);
+  \draw           (-1.3,-0.8) rectangle (1.3,0.8);
+  % objectif sur face avant (côté gauche du boîtier dans le repère local)
+  \fill[blue!15]  (-1.05,0) circle (0.22);
+  \draw           (-1.05,0) circle (0.22);
+  % petit repère direction (vers la face avant)
+  \draw[-Latex, line width=0.9pt] (-0.9,0) -- (-0.2,0);
+\end{scope}
+\node[above] at (\xR,\y0+1.25) {\footnotesize Caméra};
+
+% =========================
+% Objet (décalé) + franges
+% =========================
+% rectangle objet
+\fill[black!10] ($(O)+(-\objW/2,-\objH/2)$) rectangle ($(O)+(\objW/2,\objH/2)$);
+\draw           ($(O)+(-\objW/2,-\objH/2)$) rectangle ($(O)+(\objW/2,\objH/2)$);
+\node[above] at ($(O)+(0,\objH/2)$) {\footnotesize Objet};
+
+% --- Franges noir/blanc : on trace des bandes parallèles sur l'objet
+% Orientation des franges (perpendiculaire à la direction de projection)
+\pgfmathsetmacro{\stripeAngle}{\angP+90}
+
+\begin{scope}[shift={(O)}, rotate=\stripeAngle]
+  % cadre de clipping = rectangle de l'objet
+  \clip (-\objW/2,-\objH/2) rectangle (\objW/2,\objH/2);
+
+  % bandes alternées (noir) + traits de séparation
+  % (ajuste le pas si tu veux plus/moins de franges)
+  \foreach \x in {-0.60,-0.40,-0.20,0.00,0.20,0.40,0.60}{
+    \fill[black!35] (\x-0.05,-1.0) rectangle (\x+0.05,1.0);
+  }
+  \foreach \x in {-0.60,-0.40,-0.20,0.00,0.20,0.40,0.60}{
+    \draw[black!70, line width=0.35pt] (\x,-1.0) -- (\x,1.0);
+  }
+\end{scope}
+
+% =========================
+% Rayons optiques (triangle isocèle)
+% =========================
+\draw[ray] (Popt) -- (O);
+\draw[ray] (O) -- (Copt);
+
+\node[above] at ($(Popt)!0.55!(O)+(0,0.9)$) {\footnotesize Projection de franges};
+\node[above] at ($(O)!0.55!(Copt)+(0,0.9)$) {\footnotesize Observation / capture};
+
+% =========================
+% Cote L = 950mm
+% =========================
+\draw[dim] (\xL, \y0-\beamW/2-0.8) -- node[below] {$L \simeq 950\,\mathrm{mm}$} (\xR, \y0-\beamW/2-0.8);
+\draw (\xL, \y0-\beamW/2-0.6) -- (\xL, \y0-\beamW/2-1.0);
+\draw (\xR, \y0-\beamW/2-0.6) -- (\xR, \y0-\beamW/2-1.0);
+
+% (optionnel) médiatrice
+\draw[dashed] (0,\y0-\beamW/2-0.3) -- (0,\yObj+1.6);
+\node[right] at (0.1,\y0-\beamW/2-0.15);
+
+\end{tikzpicture}
+\caption{Vue de haut : projecteur et caméra orientés vers l’objet, franges projetées (schématique)}
+\end{figure}
+
+
+\subsection{Éléments à notre disposition}
+L'émetteur et le récepteur nous ont été fournis, le projecteur est un EPSON EB-W49 et la caméra est une Webcam C920E.
+Au début du projet nous avions des éléments laissés par les équipes des années précédentes tels que :
+\begin{itemize}
+    \item Un support pour l'émetteur et le récepteur avec deux parties tournantes, du côté émetteur la hauteur du support peut être modifiées avec trois pieds réglables, une roue avec  des mesures d'angles est placée sous la caméra nous permettant d'avoir un ordre de grandeur de l'angle de la caméra, et côté projecteur l'inclinaison est réglable grâce à un boulon à l'arrière de la planche supportant l'émetteur. 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{projecteur_sur_support.jpg}
+        \caption{Projecteur sur le support}
+        \label{fig:placeholder}
+    \end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{camera_sur_support.jpg}
+    \caption{Caméra sur le support}
+    \label{fig:placeholder}
+\end{figure}
+    \item Des éléments de volumes en polystyrène extrudé nous étaient également fournis, nottament un plan avec un damier noir et blanc utile et la calibration, et d'autre volume comme une pyramide ou logo des Écoles des Mines utilent afin de tester les capacités de reconstruction de notre projet
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{WhatsApp Image 2026-05-24 at 17.42.21.jpeg}
+    \caption{Pyramide en polystyrène}
+    \label{fig:placeholder}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{mines.png}
+    \caption{Logo des Écoles des Mines}
+    \label{fig:placeholder}
+\end{figure}
+
+
 \section{Fonctionnalités à développer}
 
 Le système d'imagerie 3D par illumination structurée repose sur un enchaînement rigoureux de fonctionnalités logicielles et matérielles. L'objectif principal est de piloter l'acquisition, d'assurer une transformation exacte des coordonnées pixels vers l'espace métrique, et de restituer un modèle 3D exploitable par l'utilisateur. 
@@ -124,7 +333,7 @@ Pour passer de l'image brute à une matrice logique exploitable, les fonctionnal
     \item \textbf{Filtrage du bruit :} Application d'un filtre spatial basse-bas pour éliminer le bruit haute fréquence inhérent au capteur de la caméra.
     \item \textbf{Seuillage adaptatif :} Afin de contrer les variations d'albédo de l'objet ou la dispersion de l'énergie lumineuse due au recul important du projecteur, le logiciel calcule dynamiquement un seuil optimal (méthode de maximisation de la variance inter-classe). Cela permet de séparer fidèlement les zones éclairées (1) des zones sombres (0), même sur des objets de géométrie complexe ou de couleur sombre.
     \item \textbf{Masque manuel}
-    Afin de faciliter le traitement des images via nos codes, nous avons choisi d'appliquer manuellement un masque autour de celles-ci. Cette étape est détaillée ici \textbf{COMPLETER IMPORTANT IMPORTANT}
+    Afin de faciliter le traitement des images via nos codes, nous avons choisi d'appliquer manuellement un masque autour de celles-ci. Cette étape est détaillée \hyperref[ici]{ici}
 \end{itemize}
 
 \subsection{Calibration automatique du système}
@@ -134,16 +343,156 @@ La calibration est la brique logicielle critique permettant de lier les coordonn
     \item \textbf{Calibration de l'Émetteur :} À l'aide d'une méthode indirecte, le projecteur affiche une mire numérique sur le plan du damier. Les points identifiés par la caméra permettent, par intersection de rayons optiques et triangulation avec le plan physique, de calculer la matrice de projection perspective normalisée de l'émetteur ($M_{EN}$).
 \end{itemize}
 
-\subsection{Reconstruction tridimensionnelle par triangulation}
-Une fois les images nettoyées et le système calibré, l'imageur traite la géométrie de l'objet:
-\begin{itemize}
-    \item \textbf{Génération de la matrice de localisation $L_C$ :} Pour chaque pixel $(u_R, v_R)$ de la caméra, la succession temporelle des états lumineux (noir ou blanc) est convertie en un mot binaire unique. La formule de sommation calcule l'indice de frange correspondant:
-    \begin{equation}
-        C(u_R, v_R) = \sum_{k=0}^{N-1} M_k(u_R, v_R) \cdot 2^{N-1-k}
-    \end{equation}
-    \item \textbf{Identification de l'abscisse émetteur $v_E$ :} Cet indice de frange $C$ permet d'isoler de manière unique la coordonnée horizontale $v_E$ sur le panneau LCD du vidéoprojecteur.
-    \item \textbf{Résolution du système :} Pour chaque pixel d'intérêt, le triplet $(u_R, v_R, v_E)$ est injecté dans un système de trois équations à trois inconnues linéaires dépendant des matrices $M_{RN}$ et $M_{EN}$. Sa résolution directe engendre un nuage de points 3D $(X, Y, Z)$ représentant fidèlement la surface de l'objet.
-\end{itemize}
+
+
+\section{Reconstruction Spatiale 3D par Lumière Structurée}
+\label{sec:reconstruction_3d}
+
+La reconstruction géométrique tridimensionnelle d'un objet d'intérêt à partir d'un système couplé caméra-projecteur repose sur l'inversion d'un modèle de projection perspective préalablement étalonné. Le formalisme mathématique exposé ci-après décrit le passage exhaustif des espaces de codage bidimensionnels discrets à un nuage de points métrique caractérisant la topologie de la surface observée.
+
+\subsection{Modélisation Géométrique et Étalonnage du Système}
+\label{subsec:calibration}
+
+Le changement de repère des coordonnées pixéliques de l'espace image vers l'espace cartésien euclidien réel ($\mathbb{R}^3$) nécessite l'estimation des matrices de projection perspective normalisées. Ces opérateurs modélisent les transformations géométriques intrinsèques et extrinsèques régissant le récepteur (caméra) et l'émetteur (projecteur).
+
+Le processus d'étalonnage débute par la caractérisation de l'appareil de capture optique. Une mire bidimensionnelle de géométrie connue (typiquement un motif en damier, illustré en Figure~\ref{fig:mire_damier}) est positionnée à une profondeur de référence $Z_i$.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{image_damier.png}
+    \caption{Enter Caption}
+    \label{fig:placeholder}
+\end{figure}
+
+Pour un ensemble de $n$ points de référence cartésiens $M_i = [X_i, Y_i, Z_i]^T \in \mathbb{R}^3$ (où $n \ge 6$), nous mesurons l'ensemble des projections correspondantes $m_{Ri} = [u_{Ri}, v_{Ri}]^T$ au sein de la matrice du capteur CCD. L'opérateur de projection du récepteur, noté $M_{RN} \in \mathbb{R}^{3 \times 4}$, est modélisé par le système d'équations homogènes suivant~:
+
+\begin{equation}
+s \begin{pmatrix} u_{Ri} \\ v_{Ri} \\ 1 \end{pmatrix} = M_{RN} \begin{pmatrix} X_i \\ Y_i \\ Z_i \\ 1 \end{pmatrix}
+\label{eq:projection_recepteur}
+\end{equation}
+
+Dans l'expression \eqref{eq:projection_recepteur}, le scalaire $s \in \mathbb{R}^*$ désigne le facteur d'échelle projective, structurellement proportionnel à la profondeur locale du point par rapport au centre optique du récepteur, pondéré par sa distance focale $f_R$. La matrice $M_{RN}$ dispose de 12 coefficients définis à un facteur multiplicatif près, restreignant l'espace de recherche à 11 degrés de liberté indépendants. L'extraction de ces paramètres nécessite ainsi un minimum de 6 points non coplanaires fournissant un système linéaire déterminé de 12 équations.
+
+L'étalonnage de l'émetteur est résolu par une approche duale indirecte. La projection d'une mire numérique synthétique engendre un ensemble de points de coordonnées connues $m_{Ej} = [u_{Ej}, v_{Ej}]^T$ issus du plan LCD. Ces motifs sont projetés sur la scène et acquis par le récepteur sous forme de points images $m_{Rj} = [u_{Rj}, v_{Rj}]^T$. L'intersection géométrique des rayons optiques rétro-projetés issus de la caméra avec le plan d'appui fournit les coordonnées spatiales 3D des points réfléchis. La matrice de projection de l'émetteur $M_{EN} \in \mathbb{R}^{3 \times 4}$ est dès lors calculée via la relation~:
+
+\begin{equation}
+s' \begin{pmatrix} u_{Ej} \\ v_{Ej} \\ 1 \end{pmatrix} = M_{EN} \begin{pmatrix} X_j \\ Y_j \\ Z_j \\ 1 \end{pmatrix}
+\label{eq:projection_emetteur}
+\end{equation}
+
+L'amplitude du facteur d'échelle $s'$ est explicitée analytiquement par le produit de la focale de l'émetteur $f_E$ et de sa constante d'échelle de numérisation $\sigma_{E}$, se simplifiant au niveau de la surface de référence par la coordonnée de profondeur~:
+
+\begin{equation}
+s' = f_E \cdot \sigma_E = Z_i
+\end{equation}
+
+\subsection{Décodage Temporel et Génération de la Matrice de Localisation}
+\label{subsec:decodage_binaire}
+
+Afin d'établir l'appariement pixel à pixel entre le plan du capteur de capture et le plan de projection, une séquence de $N$ franges binaires est projetée. Soit $M_k(u_R, v_R) \in \{0, 1\}$ l'état binaire du pixel $(u_R, v_R)$ extrait lors de la $k$-ième capture. Le code binaire absolu $C(u_R, v_R) \in \mathbb{N}$ est sommé selon la fonction d'ordre pondérée suivante~:
+
+\begin{equation}
+C(u_R, v_R) = \sum_{k=0}^{N-1} M_k(u_R, v_R) \cdot 2^{N-1-k}
+\label{eq:somme_binaire}
+\end{equation}
+
+Cette convolution temporelle discrète projette l'ensemble des images 2D vers une matrice d'état de localisation, notée $L_C$, où chaque cellule contient l'identifiant de la frange émise par le projecteur. L'implémentation algorithmique de cette phase de binarisation et de décodage est présentée dans le Listing~\ref{lst:binarization_code}.
+
+\begin{lstlisting}[language=Python, label=lst:binarization_code, caption={Algorithme de binarisation dynamique locale et de décodage des codes de franges.}]
+def binariser_franges(captures: np.ndarray, masque: np.ndarray) -> np.ndarray:
+    # Analyse locale du contraste pour pallier les defauts d'unseuil global
+    image_max = captures.max(axis=0).astype(np.float32)
+    image_min = captures.min(axis=0).astype(np.float32)
+    seuil = (image_max + image_min) * 0.5
+    # Traduction directe du predicat d'activation binaire
+    binaire = (captures.astype(np.float32) > seuil[None, :, :]).astype(np.uint8)
+    binaire[:, ~masque] = 0
+    return binaire
+
+def decoder_coordonnees_projecteur(franges_binaires: np.ndarray, masque: np.ndarray) -> np.ndarray:
+    # Inversion de phase en accord avec la structure des bandes du generateur
+    franges_inversees = 1 - franges_binaires
+    nombre_bits = franges_inversees.shape[0]
+    # Generation du vecteur de ponderation de l'equation (4)
+    poids = (2 ** np.arange(nombre_bits - 1, -1, -1)).astype(np.int32)[:, None, None]
+    code = np.sum(franges_inversees * weights, axis=0)
+    code[~masque] = 0
+    # Filtrage median pour eliminer le bruit de quantification aux transitions
+    code = cv2.medianBlur(code.astype(np.uint16), 3).astype(np.float32)
+    code[~masque] = 0
+    return code
+\end{lstlisting}
+
+\subsection{Identification Absolue de l'Abscisse Émetteur}
+\label{subsec:abscisse_emetteur}
+
+L'évaluation de l'indice de frange $C(u_R, v_R)$ permet d'isoler de manière univoque la coordonnée horizontale discrète $v_E$ caractérisant le plan LCD d'émission. En désignant par $v_{Eg}$ et $v_{Ed}$ les frontières spatiales gauche et droite de la frange considérée, la coordonnée centrale normalisée s'écrit~:
+
+\begin{equation}
+v_E = \frac{v_{Eg} + v_{Ed}}{2} \quad \text{avec} \quad v_{Eg} = \left(\frac{N_{bHE}}{2^N} \cdot C\right) + 1
+\label{eq:coordonnee_ve}
+\end{equation}
+
+Où $N_{bHE}$ matérialise la dimension de la largeur physique du projecteur en pixels. Au sein du pipeline de calcul, cette discrétisation géométrique se traduit par le calcul du pas d'échantillonnage de la lumière structurée~:
+\begin{equation}
+\Delta_{px} = \frac{\text{LARGEUR\_PROJECTEUR\_PX}}{2^N}
+\end{equation}
+
+\subsection{Triangulation Spatiale par Résolution du Système Linéaire}
+\label{subsec:triangulation}
+
+À l'issue de la phase d'extraction, chaque pixel d'intérêt du capteur est associé à un triplet d'observations couplées $(u_R, v_R, v_E)$. L'estimation des coordonnées réelles tridimensionnelles $P = [X, Y, Z]^T \in \mathbb{R}^3$ revient à résoudre un système surdéterminé de trois équations algébriques indépendantes à trois inconnues. En décomposant les matrices de projection calibrées du récepteur ($M_{RN} = \{m_{ijR}\}$) et de l'émetteur ($M_{EN} = \{m_{ijE}'\}$), le système linéaire s'énonce tel que~:
+
+\begin{equation}
+\begin{cases}
+(m_{11R} - u_R m_{31R})X + (m_{12R} - u_R m_{32R})Y + (m_{13R} - u_R m_{33R})Z \\
+\quad = u_R m_{34R} - m_{14R} \\
+(m_{21R} - v_R m_{31R})X + (m_{22R} - v_R m_{32R})Y + (m_{23R} - v_R m_{33R})Z \\
+\quad = v_R m_{34R} - m_{24R} \\
+(m_{11E}' - v_E m_{31E}')X + (m_{12E}' - v_E m_{32E}')Y + (m_{13E}' - v_E m_{33E}')Z \\
+\quad = v_E m_{34E}' - m_{14E}'
+\end{cases}
+\label{eq:systeme_triangulation}
+\end{equation}
+
+Ce système d'équations \eqref{eq:systeme_triangulation} est résolu par décomposition algébrique linéaire en appliquant la méthode des moindres carrés pour chaque pixel validé par le masque photométrique. L'implémentation de cette étape critique de triangulation numérique est détaillée dans le Listing~\ref{lst:triangulation_code}.
+
+\begin{lstlisting}[language=Python, label=lst:triangulation_code, caption={Traduction matricielle et resolution par moindres carres du systeme de triangulation.}]
+def trianguler(
+    code_projecteur: np.ndarray,
+    masque_objet: np.ndarray,
+    matrice_recepteur: np.ndarray, # Correspond a la matrice MRN
+    matrice_emetteur: np.ndarray,  # Correspond a la matrice MEN
+    pas_projecteur: float,         # Pas spatial associe a l'equation (5)
+) -> np.ndarray:
+    hauteur, largeur = code_projecteur.shape
+    lignes, colonnes = np.indices((hauteur, largeur), dtype=np.float64)
+    valide = masque_objet
+
+    u_recepteur = colonnes[valide]
+    v_recepteur = lignes[valide]
+    # Calcul de l'abscisse discrete du projecteur vE de l'equation (5)
+    x_projecteur = (code_projecteur[valide] + 0.5) * pas_projecteur
+
+    nombre_points = len(u_recepteur)
+    systeme = np.zeros((nombre_points, 3, 3), dtype=np.float64)
+    second_membre = np.zeros((nombre_points, 3), dtype=np.float64)
+
+    # Formulation de la matrice A du systeme lineaire lie a l'equation (6)
+    systeme[:, 0, :] = u_recepteur[:, None] * matrice_recepteur[2, :3] - matrice_recepteur[0, :3]
+    systeme[:, 1, :] = v_recepteur[:, None] * matrice_recepteur[2, :3] - matrice_recepteur[1, :3]
+    systeme[:, 2, :] = x_projecteur[:, None] * matrice_emetteur[2, :3] - matrice_emetteur[0, :3]
+
+    # Formulation du second membre B du vecteur de projection
+    second_membre[:, 0] = matrice_recepteur[0, 3] - u_recepteur * matrice_recepteur[2, 3]
+    second_membre[:, 1] = matrice_recepteur[1, 3] - v_recepteur * matrice_recepteur[2, 3]
+    second_membre[:, 2] = matrice_emetteur[0, 3] - x_projecteur * matrice_emetteur[2, 3]
+
+    # Resolution numerique directe via solveur SVD/LU pour chaque point
+    points = np.linalg.solve(systeme, second_membre[..., None]).reshape(nombre_points, 3)
+    return points[np.isfinite(points).all(axis=1)]
+\end{lstlisting}
+
+La résolution de ce système pour l'ensemble du domaine d'intérêt génère un nuage de points tridimensionnel brut, qui subit ensuite un changement de base pour s'exprimer dans le repère métrique de la table d'appui via une décomposition en valeurs singulières (SVD) du plan de référence. Cette opération finale conclut rigoureusement la phase d'acquisition et de reconstruction spatiale.
 
 \subsection{Interface Graphique Utilisateur (IHM)}
 Pour rendre le système maniable et masquer la complexité mathématique sous-jacente, l'interface graphique en C\# utilisant le framework .NET centralise les fonctionnalités utilisateur suivantes:
@@ -171,7 +520,6 @@ Le logiciel intègre des fonctions de gestion de fichiers garantissant la reprod
 \end{itemize}
 
 \section{Conception}
-\section{Code}
 \subsection{Architecture du code}
 \begin{figure}[H]
     \centering
@@ -220,6 +568,35 @@ Nous avons commencé à faire l'interface graphique assez tôt car nous terminio
 \\Nous avons aussi fait des programmes python pour faire des images des franges à projetter avec l'émetteur, et avons implémenté dans l'interface la projection automatique de ces images pour accélérer la capture des images.
 \\Pour enregistrer les différentes images nous avons choisi d'utiliser des dossiers zip.
 
+\subsection{Cache image}
+\label{ici}
+L'un des problème que nous avons rencontré est la présence d'éléments inutiles sur les photos (les éléments en dehors du damier pour la calibration, ou en dehors des rayures pour les mesures d'objets); ce qui engendrait des perturbations puisque notre programme essayait de traiter ces zones inutiles. Pour remédier à cette difficulté, nous avons mis en place un système de cache. Il s'agit de sélectionner à la main un rectangle contenant les éléments que nous voulons traiter (voir image ci-dessous), et notre code homogénéisera la zone extérieur au cadre en noir pour qu'elle ne perturbe plus le processus.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{cache.jpeg}
+    \caption{Cache pour la mesure d'objet}
+    \label{fig:placeholder}
+\end{figure}
+
+Pour faciliter la mise en place du cache, nous avons choisi de le fixer lors de la calibration émeteur, de façon à ce qu'il englobe le damier pour les 2 positions z de l'écran. Ensuite nous pouvons nous permettre de garder son placement pour la mesure de l'objet car les bandes seront mesurées par la caméra à peu près au même endroit que lors de la calibration (en fonction des volumes de l'objet).
+\begin{figure}[H]
+    \centering
+    % --- Première image (à gauche) ---
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{cache2.1.jpeg}
+        \caption{Cache calibrage z=10}
+        \label{fig:cache_partie1}
+    \end{subfigure}
+    \hfill % Pousse la deuxième image vers la droite
+    % --- Deuxième image (à droite) ---
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{cache2.2.jpeg}
+        \caption{Cache calibrage z=0}
+        \label{fig:cache_partie2}
+    \end{subfigure}
+\end{figure}
 \section{Intégration et validation}
 \subsection{Interface graphique}
 Lors du développement de l'interface nous avons rapidement testé les fonctionnalités liées à la caméra et au projecteur, car nous avons considérés ces fonctions comme les plus importantes. Une fois que le retour caméra et la projection ont été validé nous avons pu vérifier l'enregistrement pour nous assuré que l'interface soit utilisable.
@@ -309,8 +686,94 @@ Sur cet essai, l'erreur moyenne de reprojection est de $0{,}69$ pixel pour le r�
 \end{figure}
 
 \subsection{Validation de la reconstruction}
-
+De même, valider la reconstruction suppose également deux étapes : vérifier que les franges sur les images de l'objet sont bien identifiées par notre algorithme, puis vérifier que l'objet reconstruit correspond bien à l'objet réel.
+\\
+ 
+Pour confirmer que la reconstruction était fonctionnelle nous avons tenté de reconstruire différents objets parmi ceux qui nous ont été fournis. Nous avons commencé par utilisé un simple plan. Les premiers essais n'ont pas été fructueux car la reconstruction était courbée.
 \section{Clôture du projet}
+
+\subsection{Tableau des rendus techniques/scientifiques}
+
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{2.8cm}|X|X|X|X|}
+\hline
+\textbf{Livrable} & \textbf{Cahier des charges fonctionnel} & \textbf{Revue de projet} & \textbf{Rapport final} & \textbf{Recette du projet} \\
+\hline
+\textbf{Description} &
+Rédigé à l’issue de la phase de cadrage, le document de cadrage rend compte de l’état initial du projet selon les différents axes : scientifique/technique et organisationnel (équipe, projet). & 
+La revue de projet et d'équipe est réalisée à mi-parcours de la phase de production sous la forme d'une soutenance orale devant l'encadrement. & 
+Rédigé à l’issue de la phase de production, le rapport du projet rend compte de l’état final du projet selon les différents axes : scientifique/technique et organisationnel (équipe, projet). & 
+À l’issue du projet, la recette (réunion finale entre l'encadrant et l'équipe) rend compte de l’état final du projet selon les différents axes : scientifique/technique et organisationnel (équipe, projet). \\
+\hline
+\textbf{Format} & PDF & PDF & PDF & PDF \\
+\hline
+\textbf{Date de rendu} & dimanche 1 mars 2026, 23:59 & mardi 7 avril 2026, 23:59 & mardi 26 mai 2026, 23:59 & jeudi 28 mai 2026, 23:59 \\
+\hline
+\end{tabularx}
+
+\subsection{Validation}
+
+\subsubsection{Calibration}
+
+\subsubsubsection{Scénario de démonstration}
+
+Objectif : Initialiser le système d'imagerie 3D et calibrer le couple caméra-projecteur pour pouvoir réaliser une acquisition par lumière structurée.
+
+\begin{itemize}
+    \item{Étape 1 : Installation matérielle}
+    \begin{itemize}
+        \item{Action : L'utilisateur positionne le projecteur et la caméra face à la zone de numérisation et les connecte à l'ordinateur.}
+
+        \item{Résultat attendu : Les périphériques sont alimentés et reconnus par le système d'exploitation.}
+    \end{itemize}
+
+    \item{Étape 2 : Lancement du système}
+    \begin{itemize}
+        \item{Action : L'utilisateur exécute le logiciel d'acquisition.}
+        \item{Résultat attendu : L'interface graphique s'ouvre et affiche le flux vidéo en direct de la caméra.}
+    \end{itemize}
+
+    \item{Étape 3 : Capture de la première image de la mire (Damier)}
+    \begin{itemize}
+        \item{Action : L'utilisateur place le damier de calibration dans la position lointaine des supports de calibration, puis clique sur le bouton "Calibration" puis "Image 1" de l'interface.}
+        \item{Résultat attendu : Le logiciel fige l'image, détecte automatiquement les coins du damier et valide la capture de la première image.}
+    \end{itemize}
+
+    \item{Étape 4 : Capture de la deuxième image de la mire (Damier)}
+    \begin{itemize}
+        \item{Action : L'utilisateur place le damier de calibration dans la position proche des supports de calibration, puis  clique sur le bouton "Image 2" de l'interface.}
+        \item{Résultat attendu : Le logiciel fige la deuxième image, détecte automatiquement les coins du damier et valide la capture de la deuxième image.}
+    \end{itemize}
+
+    \item{Étape 5 : Capture de la première image de la mire projetée}
+    \begin{itemize}
+        \item{Action : L'utilisateur projette le damier de calibration sur le plan une fois placé dans la postion lointaine des supports de calibration, puis clique sur le bouton "Image 3" de l'interface.}
+        \item{Résultat attendu : Le logiciel fige l'image, détecte automatiquement les coins du damier projeté et valide la capture de la première image du damier projeté.}
+    \end{itemize}
+
+    \item{Étape 6 : Capture de la deucième image de la mire projetée}
+    \begin{itemize}
+        \item{Action : L'utilisateur place le plan sur lequel est projeté le damier dans la position proche des supports de calibration, puis  clique sur le bouton "Image 4" de l'interface.}
+        \item{Résultat attendu : Le logiciel fige l'image, détecte automatiquement les coins du damier projeté et valide la capture de la deuxième image du damier projeté.}
+    \end{itemize}
+\end{itemize}
+
+\subsubsubsection{Expériences de validation de la calibration}
+
+Pour valider quantitativement la précision de la calibration du couple caméra-projecteur, les protocoles expérimentaux suivants ont été mis en œuvre :
+
+\begin{itemize}
+    \item \textbf{Expérience 1 : Évaluation de l'erreur de reprojection}
+    \begin{itemize}
+        \item \textit{Protocole :} Analyse de l'écart pixel entre les points réels détectés sur le damier et les points reprojetés mathématiquement par les matrices calculées.
+        \item \textit{Critère de succès :} L'erreur de reprojection moyenne doit être strictement inférieure à 1 pixel ($\epsilon < 1 \text{ px}$).
+    \end{itemize}
+
+    \item \textbf{Expérience 2 : Mesure de fidélité métrique}
+    \begin{itemize}
+        \item \textit{Protocole :} Mesure logicielle de l'entraxe entre deux coins éloignés du damier physique (valeur nominale connue : $120 \text{ mm}$) à partir des données calibrées.
+        \item \textit{Critère de succès :} L'écart avec la dimension réelle doit être inférieur à $0.5 \text{ mm}$.
+    \end{itemize}
+\end{itemize}
 
 \section{Retour d'expérience}
 
@@ -339,7 +802,7 @@ Sur cet essai, l'erreur moyenne de reprojection est de $0{,}69$ pixel pour le r�
 
 \subsection{Codes}
 
-\subsection*{Retours d'expériences individuels}
+\subsection{Retours d'expériences individuels}
 
 \subsubsection*{Boulard Gaëtan}
 
