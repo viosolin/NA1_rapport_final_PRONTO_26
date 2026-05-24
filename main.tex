@@ -230,6 +230,84 @@ Valider la calibration suppose deux étapes : vérifier dans un premier temps qu
 
 Lors d'un essai, voici les 4 images permettant la calibration que nous avons pu prendre :
 
+\begin{figure}[H]
+    \centering
+    \makebox[\linewidth][c]{%
+    \begin{tabular}{cc}
+        \includegraphics[width=0.56\linewidth,height=4.1cm,keepaspectratio]{calibration_recepteur_z0_brut.png} &
+        \includegraphics[width=0.56\linewidth,height=4.1cm,keepaspectratio]{calibration_recepteur_z100_brut.png} \\
+        \small Récepteur, position initiale &
+        \small Récepteur, position décalée de 10 cm \\[0.25cm]
+        \includegraphics[width=0.56\linewidth,height=4.1cm,keepaspectratio]{calibration_emetteur_z0_brut.png} &
+        \includegraphics[width=0.56\linewidth,height=4.1cm,keepaspectratio]{calibration_emetteur_z100_brut.png} \\
+        \small Émetteur, position initiale &
+        \small Émetteur, position décalée de 10 cm
+    \end{tabular}}
+    \caption{Images brutes utilisées pour la calibration du récepteur et de l'émetteur.}
+    \label{fig:calibration_brutes}
+\end{figure}
+
+À partir de ces images, l'algorithme recherche automatiquement les intersections du quadrillage. Pour contrôler cette étape, nous générons une seconde série d'images où les points détectés sont superposés aux captures. Cela permet de vérifier visuellement que le damier a bien été reconnu avant d'utiliser les coordonnées pour calculer les matrices de calibration.
+
+\begin{figure}[H]
+    \centering
+    \makebox[\linewidth][c]{\includegraphics[width=1.19\linewidth,height=7.7cm,keepaspectratio]{calibration_recepteur_z0_controle.png}}
+    \caption{Points détectés pour la calibration du récepteur en position initiale.}
+    \label{fig:calibration_recepteur_z0_controle}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \makebox[\linewidth][c]{\includegraphics[width=1.19\linewidth,height=7.7cm,keepaspectratio]{calibration_recepteur_z100_controle.png}}
+    \caption{Points détectés pour la calibration du récepteur après déplacement de 10 cm.}
+    \label{fig:calibration_recepteur_z100_controle}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \makebox[\linewidth][c]{\includegraphics[width=1.19\linewidth,height=7.7cm,keepaspectratio]{calibration_emetteur_z0_controle.png}}
+    \caption{Points détectés pour la calibration de l'émetteur en position initiale.}
+    \label{fig:calibration_emetteur_z0_controle}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \makebox[\linewidth][c]{\includegraphics[width=1.19\linewidth,height=7.7cm,keepaspectratio]{calibration_emetteur_z100_controle.png}}
+    \caption{Points détectés pour la calibration de l'émetteur après déplacement de 10 cm.}
+    \label{fig:calibration_emetteur_z100_controle}
+\end{figure}
+
+Ces images de contrôle permettent de valider la première étape de la calibration. Les points détectés doivent former un quadrillage régulier, complet et cohérent avec l'orientation du damier. Une détection exploitable se caractérise par l'absence de point manquant, par un ordre de parcours stable des intersections et par une continuité géométrique entre les lignes et les colonnes. Si l'un de ces critères n'est pas respecté, la calibration est relancée, car une seule mauvaise correspondance peut dégrader fortement les matrices calculées.
+
+Une fois les points validés sur les quatre images, ils sont utilisés pour calculer les matrices de projection du récepteur et de l'émetteur. La pertinence de ces matrices est ensuite vérifiée par reprojection : les points 3D connus du damier sont projetés de nouveau dans les images, puis comparés aux points détectés. La validation est effectuée sur les deux positions du damier, en position initiale puis après le déplacement de 10 cm, afin de vérifier que la profondeur utilisée pour la calibration est bien prise en compte.
+
+Pour le récepteur, les points détectés dans les images sont comparés aux projections obtenues avec la matrice $M_R$. Les points verts correspondent aux points détectés, les points rouges aux points reprojetés et les segments jaunes représentent l'erreur locale entre les deux positions.
+
+\begin{figure}[H]
+    \centering
+    \makebox[\linewidth][c]{\includegraphics[width=1.08\linewidth,height=0.82\textheight,keepaspectratio]{validation_reprojection_recepteur.png}}
+    \caption{Validation par reprojection de la matrice du récepteur sur les deux positions du damier.}
+    \label{fig:validation_reprojection_recepteur}
+\end{figure}
+
+Pour l'émetteur, la même vérification est menée dans le repère image du projecteur. Les coordonnées attendues du quadrillage projeté sont comparées aux coordonnées reprojetées par la matrice $M_E$. Cette étape valide que la calibration de l'émetteur reste cohérente avec la géométrie utilisée pour générer les franges et pour reconstruire les points 3D.
+
+\begin{figure}[H]
+    \centering
+    \makebox[\linewidth][c]{\includegraphics[width=1.08\linewidth,height=0.82\textheight,keepaspectratio]{validation_reprojection_emetteur.png}}
+    \caption{Validation par reprojection de la matrice de l'émetteur dans le repère du projecteur.}
+    \label{fig:validation_reprojection_emetteur}
+\end{figure}
+
+Sur cet essai, l'erreur moyenne de reprojection est de $0{,}69$ pixel pour le récepteur et de $1{,}14$ pixel pour l'émetteur. Les erreurs maximales restent respectivement proches de $3{,}26$ pixels et $3{,}09$ pixels. Ces valeurs restent faibles à l'échelle des images et ne montrent pas de dérive globale du quadrillage. Les matrices obtenues sont donc cohérentes avec la géométrie réelle du montage et peuvent être utilisées pour la reconstruction 3D.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{validation_erreurs_reprojection.png}
+    \caption{Synthèse des erreurs de reprojection obtenues sur l'exemple de calibration validé.}
+    \label{fig:validation_erreurs_reprojection}
+\end{figure}
+
 \subsection{Validation de la reconstruction}
 
 \section{Clôture du projet}
