@@ -51,7 +51,7 @@ sorting=none
 \author{BOULARD Gaëtan, CORDIER Léandre, JULLIERE Thomas, RAMSIS Zainab, \\ RANNOU Mathieu}
 \imtaAuthorShort{}
 \imtaSuperviser{
-Sujet : Imageur 3D - \textbf{Nantes}  \hskip 3cm   Groupe 1\\
+Sujet : Imageur 3D - \textbf{Nantes}  \hskip 3cm   Groupe 1
 }
 \date{\noexpand\today} % automatically print today's date, can be redefined using \date{<date>}
 \title{UE Pronto - Rapport Final 2026}
@@ -80,6 +80,8 @@ Sujet : Imageur 3D - \textbf{Nantes}  \hskip 3cm   Groupe 1\\
 Le domaine de la métrologie optique a été révolutionné par l'imagerie par illumination structurée, une technique de mesure 3D sans contact permettant de modéliser des surfaces avec une précision et une rapidité croissantes. L'objectif de ce projet est de concevoir un imageur 3D dédié aux objets de grandes dimensions, allant de 1 à 4 m², afin de répondre aux besoins de secteurs industriels tels que l'aéronautique ou le nautisme.
 
 Pour ce faire, nous utilisons la technologie binaire, qui présente l'avantage de réduire considérablement le nombre d'images nécessaires à la reconstruction par rapport aux méthodes classiques. Ce choix technique permet de minimiser les capacités de stockage requises et d'accélérer le traitement informatique des données. Enfin, notre démarche s'inscrit dans une logique de faible coût, en utilisant des composants grand public comme un vidéoprojecteur et une caméra standard, nous visons une résolution de 1 mm.
+
+La technologie retenue est donc une \textbf{imagerie 3D par lumière structurée à franges binaires}. Le vidéoprojecteur joue le rôle d'émetteur en envoyant sur l'objet une succession de motifs noir et blanc, dont les franges codent spatialement les positions du projecteur. La caméra observe la déformation de ces franges sur la surface mesurée. Après seuillage des images capturées, chaque pixel caméra est associé à un code binaire, ce qui permet de retrouver la frange projetée correspondante puis de reconstruire la position 3D par triangulation.
 
 Le principe consiste à projeter successivement une série de $N$ trames binaires
 depuis le vidéoprojecteur. Chaque trame possède une fréquence spatiale croissante,
