@@ -415,7 +415,7 @@ def decoder_coordonnees_projecteur(franges_binaires: np.ndarray, masque: np.ndar
     nombre_bits = franges_inversees.shape[0]
     # Generation du vecteur de ponderation de l'equation (4)
     poids = (2 ** np.arange(nombre_bits - 1, -1, -1)).astype(np.int32)[:, None, None]
-    code = np.sum(franges_inversees * weights, axis=0)
+    code = np.sum(franges_inversees * poids, axis=0)
     code[~masque] = 0
     # Filtrage median pour eliminer le bruit de quantification aux transitions
     code = cv2.medianBlur(code.astype(np.uint16), 3).astype(np.float32)
@@ -1092,6 +1092,154 @@ Nous avons collaboré à 5 sur ce projet, pour une durée d'un semestre. L'enten
 \subsection{Calculs}
 
 \subsection{Codes}
+
+Cette annexe regroupe les extraits de code les plus structurants de la version propre du projet, situés dans le dossier \texttt{Reconstruction\_3D\_propre}. Les parties retenues correspondent aux étapes qui portent réellement la reconstruction : calibration, décodage des franges, triangulation, orchestration du pipeline et export des visualisations. Les détails d'interface, de gestion de fichiers ou d'affichage plein écran ne sont pas repris ici afin de garder une annexe lisible.
+
+\subsubsection*{Calcul des matrices de calibration}
+
+La calibration repose sur un calcul de matrice de projection à partir de correspondances entre des points 3D connus et leurs positions image. La matrice est estimée par résolution linéaire, puis validée par reprojection des points dans l'image.
+
+\begin{lstlisting}[language=Python, caption={Calcul et validation d'une matrice de projection.}]
+def compute_projection_matrix(object_points, image_points):
+    point_count = len(object_points)
+    b_matrix = np.zeros((2 * point_count, 11), dtype=np.float64)
+    c_vector = np.zeros((2 * point_count, 1), dtype=np.float64)
+
+    for index, ((x, y, z), (u, v)) in enumerate(zip(object_points, image_points)):
+        row = 2 * index
+        b_matrix[row] = [x, y, z, 1.0, 0.0, 0.0, 0.0, 0.0, -u * x, -u * y, -u * z]
+        c_vector[row] = u
+
+        b_matrix[row + 1] = [0.0, 0.0, 0.0, 0.0, x, y, z, 1.0, -v * x, -v * y, -v * z]
+        c_vector[row + 1] = v
+
+    solution = np.linalg.pinv(b_matrix) @ c_vector
+    return np.append(solution.flatten(), 1.0).reshape(3, 4)
+
+def reprojection_error(matrix, object_points, image_points):
+    homogeneous = np.hstack([object_points, np.ones((len(object_points), 1))])
+    projection = (matrix @ homogeneous.T).T
+    projection = projection[:, :2] / projection[:, 2:3]
+    errors = np.linalg.norm(projection - image_points, axis=1)
+    return float(errors.mean()), float(errors.max())
+\end{lstlisting}
+
+\subsubsection*{Décodage des franges}
+
+Chaque pixel observé par la caméra est seuillé à partir de sa propre dynamique lumineuse. Cette approche évite d'imposer un seuil global, qui serait trop sensible aux variations d'éclairage et aux ombres. Les bits obtenus sont ensuite convertis en indice de frange projecteur.
+
+\begin{lstlisting}[language=Python, caption={Binarisation locale et décodage des coordonnées projecteur.}]
+def binariser_franges(captures: np.ndarray, masque: np.ndarray) -> np.ndarray:
+    image_max = captures.max(axis=0).astype(np.float32)
+    image_min = captures.min(axis=0).astype(np.float32)
+    seuil = (image_max + image_min) * 0.5
+
+    binaire = (captures.astype(np.float32) > seuil[None, :, :]).astype(np.uint8)
+    binaire[:, ~masque] = 0
+    return binaire
+
+def decoder_coordonnees_projecteur(franges_binaires: np.ndarray, masque: np.ndarray) -> np.ndarray:
+    franges_inversees = 1 - franges_binaires
+    nombre_bits = franges_inversees.shape[0]
+    poids = (2 ** np.arange(nombre_bits - 1, -1, -1)).astype(np.int32)[:, None, None]
+
+    code = np.sum(franges_inversees * poids, axis=0)
+    code[~masque] = 0
+    code = cv2.medianBlur(code.astype(np.uint16), 3).astype(np.float32)
+    code[~masque] = 0
+    return code
+\end{lstlisting}
+
+\subsubsection*{Triangulation des points 3D}
+
+Une fois le pixel caméra et l'abscisse projecteur associés, la position 3D est calculée en résolvant le système issu des matrices de projection du récepteur et de l'émetteur. Le calcul est vectorisé pour traiter tous les pixels valides du masque objet.
+
+\begin{lstlisting}[language=Python, caption={Triangulation vectorisée des points reconstruits.}]
+def trianguler(code_projecteur, masque_objet, matrice_recepteur, matrice_emetteur, pas_projecteur):
+    hauteur, largeur = code_projecteur.shape
+    lignes, colonnes = np.indices((hauteur, largeur), dtype=np.float64)
+    valide = masque_objet
+
+    u_recepteur = colonnes[valide]
+    v_recepteur = lignes[valide]
+    x_projecteur = (code_projecteur[valide] + 0.5) * pas_projecteur
+
+    nombre_points = len(u_recepteur)
+    systeme = np.zeros((nombre_points, 3, 3), dtype=np.float64)
+    second_membre = np.zeros((nombre_points, 3), dtype=np.float64)
+
+    systeme[:, 0, :] = u_recepteur[:, None] * matrice_recepteur[2, :3] - matrice_recepteur[0, :3]
+    systeme[:, 1, :] = v_recepteur[:, None] * matrice_recepteur[2, :3] - matrice_recepteur[1, :3]
+    systeme[:, 2, :] = x_projecteur[:, None] * matrice_emetteur[2, :3] - matrice_emetteur[0, :3]
+
+    second_membre[:, 0] = matrice_recepteur[0, 3] - u_recepteur * matrice_recepteur[2, 3]
+    second_membre[:, 1] = matrice_recepteur[1, 3] - v_recepteur * matrice_recepteur[2, 3]
+    second_membre[:, 2] = matrice_emetteur[0, 3] - x_projecteur * matrice_emetteur[2, 3]
+
+    points = np.linalg.solve(systeme, second_membre[..., None]).reshape(nombre_points, 3)
+    return points[np.isfinite(points).all(axis=1)]
+\end{lstlisting}
+
+\subsubsection*{Pipeline de reconstruction}
+
+Le pipeline principal enchaîne les étapes précédentes : chargement des captures, application du masque, décodage des franges, triangulation, filtrage, changement de repère et sauvegarde des résultats. C'est ce bloc qui rend la reconstruction reproductible pour plusieurs objets.
+
+\begin{lstlisting}[language=Python, caption={Enchaînement principal de la reconstruction d'un objet.}]
+def reconstruire_un_dossier(nom_objet, matrice_recepteur, matrice_emetteur,
+                            centre_plan, axes_plan, filtrer_sous_plan, tolerance_sous_plan):
+    dossier_capture = DOSSIER_CAPTURES / nom_objet
+    nombre_captures = compter_captures_utilisables(dossier_capture)
+    captures = charger_captures(dossier_capture, nombre_captures)
+    masque, polygone = charger_masque(dossier_capture, captures[0].shape)
+    captures = appliquer_masque(captures, masque)
+
+    franges_binaires = binariser_franges(captures, masque)
+    code_projecteur = decoder_coordonnees_projecteur(franges_binaires, masque)
+    masque_objet = masque_objet_depuis_franges(captures, masque)
+    pas_projecteur = LARGEUR_PROJECTEUR_PX / float(2**nombre_captures)
+
+    points = trianguler(code_projecteur, masque_objet, matrice_recepteur, matrice_emetteur, pas_projecteur)
+    mode_plan = nom_objet.lower() == "plan"
+    points = filtrer_plan(points) if mode_plan else filtrer_objet(points)
+
+    points_affiches = points
+    if centre_plan is not None and axes_plan is not None:
+        points_affiches = passer_dans_repere_plan(points, centre_plan, axes_plan)
+        if not mode_plan and filtrer_sous_plan:
+            garder = points_affiches[:, 2] >= -tolerance_sous_plan
+            points = points[garder]
+            points_affiches = points_affiches[garder]
+
+    dossier_sortie = DOSSIER_RESULTATS / nettoyer_nom(nom_objet)
+    dossier_sortie.mkdir(parents=True, exist_ok=True)
+    sauver_html_3d(dossier_sortie / "vue_3d_interactive.html", nom_objet, points_affiches)
+    np.savetxt(dossier_sortie / "points_3d_repere_plan.txt", points_affiches, fmt="%.6f")
+\end{lstlisting}
+
+\subsubsection*{Visualisation interactive}
+
+Pour faciliter l'analyse des résultats, les nuages de points sont exportés sous forme de pages HTML interactives. Le code ci-dessous réduit le nombre de points si nécessaire, centre le nuage et prépare les données qui seront affichées dans le navigateur.
+
+\begin{lstlisting}[language=Python, caption={Préparation d'une visualisation 3D interactive.}]
+def sauver_html_3d(chemin: Path, titre: str, points: np.ndarray) -> None:
+    points_affiches = points
+    if len(points_affiches) > 70000:
+        indices = np.linspace(0, len(points_affiches) - 1, 70000, dtype=int)
+        points_affiches = points_affiches[indices]
+
+    points_centres = points_affiches - points_affiches.mean(axis=0)
+    echelle = float(np.max(np.ptp(points_centres, axis=0)))
+    z_min, z_max = np.percentile(points_centres[:, 2], [1, 99])
+
+    donnees = [
+        [round(float(x), 3), round(float(y), 3), round(float(z), 3)]
+        for x, y, z in points_centres
+    ]
+
+    # Le HTML complet contient le canvas et les controles souris/molette.
+    html = "<html> ... canvas interactif ... </html>"
+    chemin.write_text(html, encoding="utf-8")
+\end{lstlisting}
 
 \subsection{Retours d'expériences individuels}
 
