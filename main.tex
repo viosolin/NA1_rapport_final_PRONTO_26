@@ -527,7 +527,16 @@ Le logiciel intègre des fonctions de gestion de fichiers garantissant la reprod
     \makebox[\linewidth][c]{%
         \includegraphics[width=1.15\linewidth]{architecture_code.pdf}
     }
-    \caption{Architecture du code permettant la reconstruction d'un ou plusieurs objets}
+    \caption{Architecture générale de notre système complet de reconstruction d'objets}
+    \label{fig:placeholder}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \makebox[\linewidth][c]{%
+        \includegraphics[width=1.15\linewidth]{architecture_lancer_reconstruction.pdf}
+    }
+    \caption{Détail spécifique de l'architecture du code de reconstruction}
     \label{fig:placeholder}
 \end{figure}
 \subsection{Interface graphique}
@@ -772,7 +781,7 @@ Voici les images brutes que nous avons obtenues pour la reconstruction de trois 
 \end{figure}
 On constate ainsi que la détection des franges est correcte pour les 7 premières images, mais beaucoup plus difficile pour la 8ième probablement à cause du fait que la fréquence était très élevée et donc que les franges étaient petites sur l'images. Pour cette raison nous avons décidé de ne retenir que les 7 premières images pour effectuer la reconstruction des objets
     
-    \item Pour confirmer que la reconstruction était fonctionnelle nous avons tenté de reconstruire différents objets parmi ceux qui nous ont été fournis. Nous avons commencé par utilisé un simple plan. Les premiers essais n'ont pas été fructueux car la reconstruction était courbée car la partie reconnaissance des points ne prenait pas les points dans le bon ordre.
+    \item Pour confirmer que la reconstruction était fonctionnelle nous avons tenté de reconstruire différents objets parmi ceux qui nous ont été fournis. Nous avons commencé par utiliser un simple plan. Les premiers essais n'ont pas été fructueux car la reconstruction était courbée car la partie reconnaissance des points ne prenait pas les points dans le bon ordre.
 \begin{figure}[H]
     \centering
     \begin{minipage}{0.41\linewidth}
@@ -862,7 +871,6 @@ L'ensemble des visualisations est regroupé sur la page d'accueil des reconstruc
     \end{minipage}
     \end{center}
 
-    \newpage
     \item Sac reconstruit : {\small\url{https://math680.github.io/pronto-reconstructions-3d/sac-zainab.html}}
     
     \begin{center}
@@ -1095,5 +1103,12 @@ Le projet fut très instructif, j'ai beaucoup appris sur le plan technique et hu
     Nous avons rencontré un problème pendant la phase de calibration, nous déplacions le damier à la main. C'était beaucoup trop approximatif et cela faussait la précision de nos mesures. Pour régler ce problème, j'ai conçu et imprimé en 3D un système de supports spécifiques. L'idée est d'en placer deux de chaque côté du damier pour bien le caler. J'ai configuré ces supports avec deux positions fixes, une arrière et une avant, qui bloquent complètement les mouvements de rotation ou les écarts sur les côtés. Cela permet de faire glisser le damier d'une position à l'autre pour obtenir une translation parfaite de 10 centimètres vers l'avant. Grâce à cela, nous avons supprimé l'erreur humaine : le mouvement est devenu 100\% répétable et le déplacement lors de la calibration est maintenant d'une précision parfaite.
 \subsubsection*{Jullière Thomas}
 C'était très bien!
+
+\subsubsection*{Rannou Mathieu}
+Ce projet m’a permis de découvrir les difficultés concrètes liées au développement d’un système de reconstruction 3D complet, depuis la calibration jusqu’à la visualisation finale des résultats. J’ai principalement travaillé sur les aspects logiciels et sur l’intégration des différentes parties du projet afin d’obtenir une chaîne de reconstruction fonctionnelle et simple à utiliser.
+
+Le développement de l’interface graphique et l’automatisation des acquisitions m’ont permis de mieux comprendre l’importance de l’ergonomie et de l’organisation du code dans un projet expérimental. J’ai également appris à gérer des problèmes pratiques liés au traitement d’image, à la calibration et à la qualité des reconstructions obtenues.
+
+Enfin, ce projet a été une bonne expérience de travail en équipe, notamment pendant les phases d’intégration où il fallait faire fonctionner ensemble des éléments développés séparément.
 
 \end{document}
