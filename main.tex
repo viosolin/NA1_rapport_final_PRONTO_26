@@ -927,9 +927,9 @@ Bien que le système actuel permette une reconstruction 3D fonctionnelle, plusie
 
 \begin{itemize}
     \item \textbf{Optimisation des composants optiques :} Opter pour une caméra et un projecteur bénéficiant de résolutions supérieures afin d'augmenter la densité du nuage de points final et la finesse des détails reconstruits.
-    \item \textbf{Évolution du protocole de lumière structurée :} Remplacer le codage binaire simple par une approche combinant le \textit{Code de Gray} et le \textit{décalage de franges sinusoïdales} (\textit{Phase Shifting}). Cela permettrait d'atteindre une précision de reconstruction au sous-pixel près tout en réduisant la sensibilité aux bruits de transition.
-    \item \textbf{Gestion des surfaces complexes (HDR) :} Implémenter un algorithme d'acquisition à grande dynamique (\textit{High Dynamic Range} - HDR) en faisant varier le temps d'exposition de la caméra pour chaque motif projeté. Cela fiabiliserait la numérisation des objets présentant de fortes variations de réflectance (surfaces brillantes, métalliques ou très sombres).
-    \item \textbf{Automatisation de la reconstruction à 360° :} Intégrer un plateau tournant motorisé asservi par le logiciel d'acquisition, associé à un algorithme de recalage de nuages de points de type ICP (\textit{Iterative Closest Point}), afin de générer automatiquement un modèle 3D complet de l'objet sans manipulation manuelle.
+    \item \textbf{Évolution du protocole de lumière structurée :} Remplacer le codage binaire simple par une approche combinant le \textit{Code de Gray} et le \textit{décalage de franges sinusoïdales} (\textit{Phase Shifting}). Cela permettrait d'atteindre une précision de reconstruction au sous-pixel près tout en réduisant la sensibilité aux bruits de transition, le principe de ces deux méthodes est expliqué dans les publications de Zhang Y. et de Chen T..
+    \item \textbf{Gestion des surfaces complexes (HDR) :} Implémenter un algorithme d'acquisition à grande dynamique (\textit{High Dynamic Range} - HDR) en faisant varier le temps d'exposition de la caméra pour chaque motif projeté. Cela fiabiliserait la numérisation des objets présentant de fortes variations de réflectance (surfaces brillantes, métalliques ou très sombres) (voir la publication de Zhang S. et Yau S.-T.).
+    \item \textbf{Automatisation de la reconstruction à 360° :} Intégrer un plateau tournant motorisé asservi par le logiciel d'acquisition, associé à un algorithme de recalage de nuages de points de type ICP (\textit{Iterative Closest Point}), afin de générer automatiquement un modèle 3D complet de l'objet sans manipulation manuelle (voir l'article de référence de Besl P. J. et McKay N. D., "A method for registration of 3-D shapes").
 \end{itemize}
 
 \section{Retour d'expérience}
@@ -961,6 +961,8 @@ Nous avons collaboré à 5 sur ce projet, pour une durée d'un semestre. L'enten
 \begin{itemize}
     \item \textbf{ZHANG Y., YILMAZ A.}, ``Structured light based 3D scanning for specular surface by the combination of Gray code and phase shifting,'' \textit{The International Archives of the Photogrammetry, Remote Sensing and Spatial Information Sciences}, vol. XLI-B3, pp. 137--142, Jul. 2016.
     \item \textbf{CHEN T., SEIDEL H.-P., LENSCH H. P. A.}, ``Modulated Phase-Shifting for 3D Scanning,'' in \textit{IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, Anchorage, AK, USA, 2008, pp. 1--8.
+    \item \textbf{BESL P. J., MCKAY N. D.}, ``A method for registration of 3-D shapes,'' \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence}, vol. 14, no. 2, pp. 239--256, Feb. 1992.
+    \item \textbf{ZHANG S., YAU S.-T.}, ``High-dynamic-range scanning technique for 3D shape measurement,'' \textit{Optical Engineering}, Department of Mechanical Engineering (Iowa State University) \& Department of Mathematics (Harvard University), vol. 48, no. 3, p. 033601, Mar. 2009.
 \end{itemize}
 
  
