@@ -19,7 +19,7 @@
 \usepackage{float}
 \usepackage{listings}
 \usepackage{xcolor}
-\usepackage{microtype}
+\usepackage[expansion=false]{microtype}
 
 % Configuration de listings pour la coloration syntaxique du code Python
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -73,6 +73,7 @@
 
 %% Addtionnal packages can be loaded here
 \usepackage{url}
+\usepackage{xurl}
 %% for a complete and flexible bibliography
 \usepackage[
 backend=biber,
@@ -274,7 +275,7 @@ Enfin, la calibration du capteur devra se faire de manière automatique à parti
 
 % (optionnel) médiatrice
 \draw[dashed] (0,\y0-\beamW/2-0.3) -- (0,\yObj+1.6);
-\node[right] at (0.1,\y0-\beamW/2-0.15);
+\node[right] at (0.1,\y0-\beamW/2-0.15) {};
 
 \end{tikzpicture}
 \caption{Vue de haut : projecteur et caméra orientés vers l’objet, franges projetées (schématique)}
@@ -774,23 +775,135 @@ On constate ainsi que la détection des franges est correcte pour les 7 premièr
     \item Pour confirmer que la reconstruction était fonctionnelle nous avons tenté de reconstruire différents objets parmi ceux qui nous ont été fournis. Nous avons commencé par utilisé un simple plan. Les premiers essais n'ont pas été fructueux car la reconstruction était courbée car la partie reconnaissance des points ne prenait pas les points dans le bon ordre.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{plan_courbé.jpeg}
+    \begin{minipage}{0.41\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{plan_brut_bit_6.png}
+        \caption*{Image brute du plan}
+    \end{minipage}
+    \hfill
+    {\Large$\rightarrow$}
+    \hfill
+    \begin{minipage}{0.41\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{plan_courbé.jpeg}
+    \end{minipage}
     \caption{Plan courbé}
-    \label{fig:placeholder}
+    \label{fig:plan_courbe}
 \end{figure}
-Après correction de la reconstruction nous avons obetnu le modèle suivant pour la pyramide :
+Afin de faciliter la consultation des résultats, nous avons également exporté plusieurs reconstructions sous forme de visualisations 3D interactives accessibles depuis un navigateur. Ces pages permettent de manipuler les nuages de points reconstruits, de changer l'angle de vue et de vérifier plus facilement la forme générale des objets que sur une simple capture fixe. Elles complètent donc les figures du rapport en donnant accès aux résultats reconstruits dans un format plus exploitable.
+
+L'ensemble des visualisations est regroupé sur la page d'accueil des reconstructions 3D :
+\begin{center}
+\small\url{https://math680.github.io/pronto-reconstructions-3d/}
+\end{center}
+
+\begin{itemize}
+    \item Plan reconstruit : {\small\url{https://math680.github.io/pronto-reconstructions-3d/plan.html}}
+    
+    \begin{center}
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{scan_plan_capture_6.png}
+    \end{minipage}
+    \hfill
+    {\Large$\rightarrow$}
+    \hfill
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{reconstruction_plan.png}
+    \end{minipage}
+    \end{center}
+
+    \item Pyramide reconstruite : {\small\url{https://math680.github.io/pronto-reconstructions-3d/pyramide-a-plat.html}}
+    
+    \begin{center}
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{scan_pyramide_capture_6.png}
+    \end{minipage}
+    \hfill
+    {\Large$\rightarrow$}
+    \hfill
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{reconstruction_pyramide.png}
+    \end{minipage}
+    \end{center}
+
+    \item Bras reconstruit : {\small\url{https://math680.github.io/pronto-reconstructions-3d/bras.html}}
+    
+    \begin{center}
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{scan_bras_capture_6.png}
+    \end{minipage}
+    \hfill
+    {\Large$\rightarrow$}
+    \hfill
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{reconstruction_bras.png}
+    \end{minipage}
+    \end{center}
+
+    \item Caisse de bricoleur reconstruite : {\small\url{https://math680.github.io/pronto-reconstructions-3d/caisse-bricoleur.html}}
+    
+    \begin{center}
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{scan_caisse_capture_6.png}
+    \end{minipage}
+    \hfill
+    {\Large$\rightarrow$}
+    \hfill
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{reconstruction_caisse.png}
+    \end{minipage}
+    \end{center}
+
+    \newpage
+    \item Sac reconstruit : {\small\url{https://math680.github.io/pronto-reconstructions-3d/sac-zainab.html}}
+    
+    \begin{center}
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{scan_sac_capture_6.png}
+    \end{minipage}
+    \hfill
+    {\Large$\rightarrow$}
+    \hfill
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{reconstruction_sac.png}
+    \end{minipage}
+    \end{center}
+
+    \item Logo des Mines reconstruit : {\small\url{https://math680.github.io/pronto-reconstructions-3d/mines.html}}
+    
+    \begin{center}
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{scan_mines_capture_6.png}
+    \end{minipage}
+    \hfill
+    {\Large$\rightarrow$}
+    \hfill
+    \begin{minipage}{0.38\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{reconstruction_mines.png}
+    \end{minipage}
+    \end{center}
+\end{itemize}
+
+Après avoir observé ces différents résultats de reconstruction, nous avons cherché à vérifier plus précisément que la déformation observée sur le plan ne se retrouvait plus sur les objets reconstruits. Pour cela, nous avons contrôlé les proportions du premier étage de la pyramide directement dans le logiciel de visualisation. La valeur de 4,6 cm indiquée sur la figure correspond à une mesure manuelle réalisée dans cet outil, utilisée comme repère relatif pour comparer les côtés entre eux, et non à la dimension physique réelle de l'objet. Cette vérification permet surtout de confirmer que la base reconstruite reste bien carrée.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{pyramide mesurée.png}
-
-    
-    
-    
-    
-    \caption{Pyramide reconstruite}
-    \label{fig:placeholder}
+    \caption{Vérification manuelle des proportions de la pyramide reconstruite.}
+    \label{fig:pyramide_ratios}
 \end{figure}
-Pour nous assurer qu'il n'y a plus de déformation nous avons mesuré les longueurs du premier étage de la pyramide pour voir si les proportions ont été conservés. On retrouve bien que la base de la pyramide est carrée avec un côté de longueur 4,6cm.
 \end{itemize}
 
 
