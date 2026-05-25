@@ -112,7 +112,7 @@ Sujet : Imageur 3D - \textbf{Nantes}  \hskip 3cm   Groupe 1
 \tableofcontents
 
 
-
+\newpage
 
 \section{Introduction}
 
@@ -614,7 +614,7 @@ Lors d'un essai, voici les 4 images permettant la calibration que nous avons pu 
         \includegraphics[width=0.56\linewidth,height=4.1cm,keepaspectratio]{calibration_recepteur_z0_brut.png} &
         \includegraphics[width=0.56\linewidth,height=4.1cm,keepaspectratio]{calibration_recepteur_z100_brut.png} \\
         \small Récepteur, position initiale &
-        \small Récepteur, position décalée de 10 cm \\[0.25cm]
+        \small Récepteur, position avancée de 10 cm \\[0.25cm]
         \includegraphics[width=0.56\linewidth,height=4.1cm,keepaspectratio]{calibration_emetteur_z0_brut.png} &
         \includegraphics[width=0.56\linewidth,height=4.1cm,keepaspectratio]{calibration_emetteur_z100_brut.png} \\
         \small Émetteur, position initiale &
@@ -687,9 +687,115 @@ Sur cet essai, l'erreur moyenne de reprojection est de $0{,}69$ pixel pour le r�
 
 \subsection{Validation de la reconstruction}
 De même, valider la reconstruction suppose également deux étapes : vérifier que les franges sur les images de l'objet sont bien identifiées par notre algorithme, puis vérifier que l'objet reconstruit correspond bien à l'objet réel.
-\\
+
+Voici les images brutes que nous avons obtenues pour la reconstruction de trois objets, respectivement le plan, la pyramide et le bras. Ayant choisit N=8 nous avons 8 images par objets : 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{images plan.png}
+    \caption{Images brutes de reconstruction du plan}
+    \label{fig:placeholder}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{images pyramides.png}
+    \caption{Images brutes de reconstruction de la pyramide}
+    \label{fig:placeholder}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{images bras.png}
+    \caption{Images brutes de reconstruction du bras}
+    \label{fig:placeholder}
+\end{figure}
+
+\begin{itemize}
+\item Pour confirmer la reconnaissance des franges, nous avons utilisé une approche visuelle, en vérifiant si les franges détectées par le programme correspondent bien à celles émises par le projecteur : 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{1.png}
+    \caption{Franges détectées sur l'Image 1}
+    \label{fig:franges1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{2.png}
+    \caption{Franges détectées sur l'Image 2}
+    \label{fig:franges2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{3.png}
+    \caption{Franges détectées sur l'Image 3}
+    \label{fig:franges3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{4.png}
+    \caption{Franges détectées sur l'Image 4}
+    \label{fig:franges4}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{5.png}
+    \caption{Franges détectées sur l'Image 5}
+    \label{fig:franges5}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{6.png}
+    \caption{Franges détectées sur l'Image 6}
+    \label{fig:franges6}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{7.png}
+    \caption{Franges détectées sur l'Image 7}
+    \label{fig:franges7}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{8.png}
+    \caption{Franges détectées sur l'Image 8}
+    \label{fig:franges8}
+\end{figure}
+On constate ainsi que la détection des franges est correcte pour les 7 premières images, mais beaucoup plus difficile pour la 8ième probablement à cause du fait que la fréquence était très élevée et donc que les franges étaient petites sur l'images. Pour cette raison nous avons décidé de ne retenir que les 7 premières images pour effectuer la reconstruction des objets
+    
+    \item Pour confirmer que la reconstruction était fonctionnelle nous avons tenté de reconstruire différents objets parmi ceux qui nous ont été fournis. Nous avons commencé par utilisé un simple plan. Les premiers essais n'ont pas été fructueux car la reconstruction était courbée car la partie reconnaissance des points ne prenait pas les points dans le bon ordre.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{plan_courbé.jpeg}
+    \caption{Plan courbé}
+    \label{fig:placeholder}
+\end{figure}
+Après correction de la reconstruction nous avons obetnu le modèle suivant pour la pyramide :
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{pyramide mesurée.png}
+
+    
+    
+    
+    
+    \caption{Pyramide reconstruite}
+    \label{fig:placeholder}
+\end{figure}
+Pour nous assurer qu'il n'y a plus de déformation nous avons mesuré les longueurs du premier étage de la pyramide pour voir si les proportions ont été conservés. On retrouve bien que la base de la pyramide est carrée avec un côté de longueur 4,6cm.
+\end{itemize}
+
+
  
-Pour confirmer que la reconstruction était fonctionnelle nous avons tenté de reconstruire différents objets parmi ceux qui nous ont été fournis. Nous avons commencé par utilisé un simple plan. Les premiers essais n'ont pas été fructueux car la reconstruction était courbée.
+
 \section{Clôture du projet}
 
 \subsection{Tableau des rendus techniques/scientifiques}
@@ -714,7 +820,7 @@ Rédigé à l’issue de la phase de production, le rapport du projet rend compt
 
 \subsubsection{Calibration}
 
-\subsubsubsection{Scénario de démonstration}
+\subsubsection*{Scénario de démonstration}
 
 Objectif : Initialiser le système d'imagerie 3D et calibrer le couple caméra-projecteur pour pouvoir réaliser une acquisition par lumière structurée.
 
@@ -757,7 +863,7 @@ Objectif : Initialiser le système d'imagerie 3D et calibrer le couple caméra-p
     \end{itemize}
 \end{itemize}
 
-\subsubsubsection{Expériences de validation de la calibration}
+\subsubsection*{Expériences de validation de la calibration}
 
 Pour valider quantitativement la précision de la calibration du couple caméra-projecteur, les protocoles expérimentaux suivants ont été mis en œuvre :
 
@@ -775,7 +881,64 @@ Pour valider quantitativement la précision de la calibration du couple caméra-
     \end{itemize}
 \end{itemize}
 
+\subsubsection{Acquisition}
+
+\subsubsection*{Scénario de démonstration}
+
+Objectif : Scanner un objet en relief en projetant une séquence de motifs binaires afin de reconstruire sa géométrie en 3D.
+
+\begin{itemize}
+\item{Étape 7 : Acquisition des données par code binaire}
+\begin{itemize}
+    \item{Action : L'utilisateur laisse le plan, positionne l'objet à numériser dans la zone de travail, puis clique sur le bouton "Lancer acquisition"  depuis l'interface graphique.}
+
+    \item{Résultat attendu : Le projecteur projette automatiquement une séquence de motifs binaires (lignes noires et blanches) sur l'objet, tandis que la caméra synchronise la capture de la suite d'images.}
+\end{itemize}
+
+\item{Étape 8 : Reconstruction et traitement 3D}
+\begin{itemize}
+    \item{Action : L'utilisateur patiente pendant que le logiciel décode les motifs capturés et applique l'algorithme de triangulation grâce aux paramètres calculés lors de la calibration.}
+
+    \item{Résultat attendu : Le logiciel traite les données en arrière-plan, puis l'interface graphique affiche le résultat final sous forme de nuage de points 3D.}
+\end{itemize}
+\end{itemize}
+
+\subsubsection*{Expériences de validation de l'acquisition}
+
+Pour évaluer les performances et la robustesse du système d'acquisition par lumière structurée (code binaire), les protocoles expérimentaux suivants ont été réalisés :
+
+\begin{itemize}
+    \item \textbf{Expérience 1 : Évaluation de la fidélité géométrique}
+    \begin{itemize}
+        \item \textit{Protocole :} Numérisation 3D d'un objet de géométrie et de dimensions connues avec précision (ex: un cube ou un cylindre étalon). Comparaison des dimensions extraites du nuage de points 3D avec les dimensions réelles de l'objet.
+        \item \textit{Critère de succès :} L'écart maximal entre les mesures reconstruites et les dimensions réelles doit être inférieur au seuil de tolérance fixé (ex: $\Delta \le 1 \text{ mm}$).
+    \end{itemize}
+
+    \item \textbf{Expérience 2 : Robustesse au bruit et à la luminosité ambiante}
+    \begin{itemize}
+        \item \textit{Protocole :} Répétition de la séquence d'acquisition d'un même objet sous trois conditions d'éclairage ambiant différentes (obscurité, éclairage néon standard, forte luminosité). Analyse du taux de pixels aberrants non décodés dans le nuage de points.
+        \item \textit{Critère de succès :} Le décodage du code binaire doit rester stable et le taux de points perdus ou aberrants doit rester inférieur à $5\%$ dans les conditions nominales d'utilisation.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Axes d'amélioration du système}
+
+Bien que le système actuel permette une reconstruction 3D fonctionnelle, plusieurs axes d'amélioration techniques et algorithmiques peuvent être envisagés pour en augmenter les performances :
+
+\begin{itemize}
+    \item \textbf{Optimisation des composants optiques :} Opter pour une caméra et un projecteur bénéficiant de résolutions supérieures afin d'augmenter la densité du nuage de points final et la finesse des détails reconstruits.
+    \item \textbf{Évolution du protocole de lumière structurée :} Remplacer le codage binaire simple par une approche combinant le \textit{Code de Gray} et le \textit{décalage de franges sinusoïdales} (\textit{Phase Shifting}). Cela permettrait d'atteindre une précision de reconstruction au sous-pixel près tout en réduisant la sensibilité aux bruits de transition.
+    \item \textbf{Gestion des surfaces complexes (HDR) :} Implémenter un algorithme d'acquisition à grande dynamique (\textit{High Dynamic Range} - HDR) en faisant varier le temps d'exposition de la caméra pour chaque motif projeté. Cela fiabiliserait la numérisation des objets présentant de fortes variations de réflectance (surfaces brillantes, métalliques ou très sombres).
+    \item \textbf{Automatisation de la reconstruction à 360° :} Intégrer un plateau tournant motorisé asservi par le logiciel d'acquisition, associé à un algorithme de recalage de nuages de points de type ICP (\textit{Iterative Closest Point}), afin de générer automatiquement un modèle 3D complet de l'objet sans manipulation manuelle.
+\end{itemize}
+
 \section{Retour d'expérience}
+\subsection{Retour d'expérience sur la gestion de projet}
+Planification temporelle : Gantt initial, mi projet, final, analyse des écarts, recommandations pour la suite de la formation
+Gestion des risques
+
+\subsection{Retour d'expérience sur le travail en équipe}
+Nous avons collaboré à 5 sur ce projet, pour une durée d'un semestre. L'entente entre les membres était très bonne, notamment car 4 membres étaient déja bon amis avant le projet. En effet, non seulement tous le monde s'impliquait dans le projet, mais également la communication était bonne et les avis de chacun étaient écouté. De plus, nous avons mis en place des méthodes pour travailler efficacement en équipe:  nous devions tous être présent pendant toute la durée des heures à l'emploi du temps. De plus, pour réaliser les différentes taches nous avons formé des groupes de 2 ou 3 éleves selon les préférences et compétences de chacun ; et nous avons géré temporellement ces taches avec l'utilisation d'un gantt. Enfin, l'entraide, ainsi que l'écoute des conseils de notre tuteur ont été primordiales pour la réussite du projet, car ça nous a permis de ne pas rester bloquer lorsque l'on rencontrait des difficultés.
 
 \section{Bibliographie}
 
@@ -795,6 +958,11 @@ Pour valider quantitativement la précision de la calibration du couple caméra-
 
 \textit{Introduction aux principes du code binaire et structuration des données.}
 
+\begin{itemize}
+    \item \textbf{ZHANG Y., YILMAZ A.}, ``Structured light based 3D scanning for specular surface by the combination of Gray code and phase shifting,'' \textit{The International Archives of the Photogrammetry, Remote Sensing and Spatial Information Sciences}, vol. XLI-B3, pp. 137--142, Jul. 2016.
+    \item \textbf{CHEN T., SEIDEL H.-P., LENSCH H. P. A.}, ``Modulated Phase-Shifting for 3D Scanning,'' in \textit{IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, Anchorage, AK, USA, 2008, pp. 1--8.
+\end{itemize}
+
  
 \section{Annexes}
 
@@ -810,5 +978,7 @@ Le projet fut très instructif, j'ai beaucoup appris sur le plan technique et hu
 \\
 
     Nous avons rencontré un problème pendant la phase de calibration, nous déplacions le damier à la main. C'était beaucoup trop approximatif et cela faussait la précision de nos mesures. Pour régler ce problème, j'ai conçu et imprimé en 3D un système de supports spécifiques. L'idée est d'en placer deux de chaque côté du damier pour bien le caler. J'ai configuré ces supports avec deux positions fixes, une arrière et une avant, qui bloquent complètement les mouvements de rotation ou les écarts sur les côtés. Cela permet de faire glisser le damier d'une position à l'autre pour obtenir une translation parfaite de 10 centimètres vers l'avant. Grâce à cela, nous avons supprimé l'erreur humaine : le mouvement est devenu 100\% répétable et le déplacement lors de la calibration est maintenant d'une précision parfaite.
+\subsubsection*{Jullière Thomas}
+C'était très bien!
 
 \end{document}
