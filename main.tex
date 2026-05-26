@@ -322,7 +322,7 @@ Le système d'imagerie 3D par illumination structurée repose sur un enchaîneme
 \subsection{Acquisition automatique et séquencement des données}
 Le processus d'acquisition doit garantir la parfaite synchronisation entre le vidéoprojecteur (émetteur) et la webcam (récepteur).
 \begin{itemize}
-    \item \textbf{Génération et Projection des Trames :} Le système génère de manière automatique une séquence de $N = 10$ trames binaires. Chaque image se présente sous la forme d'une matrice binaire de résolution native $1280 \times 800$ pixels (propre au vidéoprojecteur EPSON EB-W49). Ces trames, exportées au format PNG 8-bit non compressé pour éviter tout flou de transition sur les franges, sont transmises en plein écran via une liaison HDMI.
+    \item \textbf{Génération et Projection des Trames :} Le système génère de manière automatique une séquence de $N$ trames binaires. Dans le protocole final, nous avons travaillé avec 8 trames projetées, puis retenu les 7 premières pour la reconstruction car la dernière contenait des franges trop fines pour être détectée de manière fiable. Chaque image se présente sous la forme d'une matrice binaire de résolution native $1280 \times 800$ pixels (propre au vidéoprojecteur EPSON EB-W49). Ces trames, exportées au format PNG 8-bit non compressé pour éviter tout flou de transition sur les franges, sont transmises en plein écran via une liaison HDMI.
     \item \textbf{Capture et Contrôle Caméra :} Parallèlement à la projection, la webcam Logitech C920e capture la réflexion des franges sur l'objet. Afin d'éviter les biais d'exposition ou de mise au point automatique qui dégraderaient le traitement, les paramètres de capture (temps d'exposition, gain, balance des blancs) sont entièrement verrouillés et pilotés via la bibliothèque OpenCV. Les images acquises en résolution $1920 \times 1080$ pixels sont instantanément vectorisées sous forme de tenseurs multidimensionnels pour optimiser la vitesse de traitement.
 \end{itemize}
 
@@ -600,7 +600,7 @@ Pour rendre le système maniable et masquer la complexité mathématique sous-ja
 Le logiciel intègre des fonctions de gestion de fichiers garantissant la reproductibilité des mesures:
 \begin{itemize}
     \item \textbf{Sauvegarde de la configuration :} Exportation des coefficients des matrices de calibration ($M_{RN}$ et $M_{EN}$) dans un format de fichier léger (ex: texte ou XML), permettant à l'utilisateur de charger une calibration existante lors de mesures ultérieures sans répéter le processus de ciblage.
-    \item \textbf{Export du modèle 3D :} Restitue le nuage de points ou le maillage final dans un format standardisé et ouvert (tel que .PLY ou .OBJ), nativement compatible avec les logiciels de CAO ou les trancheurs d'impression 3D pour la fabrication à échelle réduite.
+    \item \textbf{Export du modèle 3D :} Restitue le nuage de points reconstruit sous forme de fichier de points et de page HTML interactive. Ces exports correspondent au format réellement utilisé pour analyser les résultats présentés dans ce rapport ; un export vers des formats de CAO comme \texttt{.PLY} ou \texttt{.OBJ} resterait une extension possible.
 \end{itemize}
 
 \section{Conception}
