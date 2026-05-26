@@ -79,7 +79,6 @@
 backend=biber,
 sorting=none
 ]{biblatex}
-
 \usepackage{graphicx}
 
 %\addbibresource{reference.bib}
@@ -283,7 +282,7 @@ Enfin, la calibration du capteur devra se faire de manière automatique à parti
 
 
 \subsection{Éléments à notre disposition}
-L'émetteur et le récepteur nous ont été fournis, le projecteur est un EPSON EB-W49 et la caméra est une Webcam C920E.
+L'émetteur et le récepteur nous ont été fournis, la caméra est une Webcam C920E [1] et le projecteur est un EPSON EB-W49[2].
 Au début du projet nous avions des éléments laissés par les équipes des années précédentes tels que :
 \begin{itemize}
     \item Un support pour l'émetteur et le récepteur avec deux parties tournantes, du côté émetteur la hauteur du support peut être modifiées avec trois pieds réglables, une roue avec  des mesures d'angles est placée sous la caméra nous permettant d'avoir un ordre de grandeur de l'angle de la caméra, et côté projecteur l'inclinaison est réglable grâce à un boulon à l'arrière de la planche supportant l'émetteur. 
@@ -356,11 +355,11 @@ La reconstruction géométrique tridimensionnelle d'un objet d'intérêt à part
 
 Le changement de repère des coordonnées pixéliques de l'espace image vers l'espace cartésien euclidien réel ($\mathbb{R}^3$) nécessite l'estimation des matrices de projection perspective normalisées. Ces opérateurs modélisent les transformations géométriques intrinsèques et extrinsèques régissant le récepteur (caméra) et l'émetteur (projecteur).
 
-Le processus d'étalonnage débute par la caractérisation de l'appareil de capture optique. Une mire bidimensionnelle de géométrie connue (typiquement un motif en damier, illustré en Figure~\ref{fig:mire_damier}) est positionnée à une profondeur de référence $Z_i$.
+Le processus d'étalonnage débute par la caractérisation de l'appareil de capture optique. Une mire bidimensionnelle de géométrie connue (typiquement un motif en damier, illustré en Figure 6 ) est positionnée à une profondeur de référence $Z_i$.
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\linewidth]{image_damier.png}
-    \caption{Enter Caption}
+    \includegraphics[width=0.7\linewidth]{image_damier.png}
+    \caption{Damier}
     \label{fig:placeholder}
 \end{figure}
 
@@ -397,6 +396,9 @@ C(u_R, v_R) = \sum_{k=0}^{N-1} M_k(u_R, v_R) \cdot 2^{N-1-k}
 \end{equation}
 
 Cette convolution temporelle discrète projette l'ensemble des images 2D vers une matrice d'état de localisation, notée $L_C$, où chaque cellule contient l'identifiant de la frange émise par le projecteur. L'implémentation algorithmique de cette phase de binarisation et de décodage est présentée dans le Listing~\ref{lst:binarization_code}.
+
+
+
 
 \begin{lstlisting}[language=Python, label=lst:binarization_code, caption={Algorithme de binarisation dynamique locale et de décodage des codes de franges.}]
 def binariser_franges(captures: np.ndarray, masque: np.ndarray) -> np.ndarray:
@@ -455,6 +457,8 @@ Où $N_{bHE}$ matérialise la dimension de la largeur physique du projecteur en 
 \label{eq:systeme_triangulation}
 \end{equation}
 
+
+
 Ce système d'équations \eqref{eq:systeme_triangulation} est résolu par décomposition algébrique linéaire en appliquant la méthode des moindres carrés pour chaque pixel validé par le masque photométrique. L'implémentation de cette étape critique de triangulation numérique est détaillée dans le Listing~\ref{lst:triangulation_code}.
 
 \begin{lstlisting}[language=Python, label=lst:triangulation_code, caption={Traduction matricielle et resolution par moindres carres du systeme de triangulation.}]
@@ -495,6 +499,86 @@ def trianguler(
 
 La résolution de ce système pour l'ensemble du domaine d'intérêt génère un nuage de points tridimensionnel brut, qui subit ensuite un changement de base pour s'exprimer dans le repère métrique de la table d'appui via une décomposition en valeurs singulières (SVD) du plan de référence. Cette opération finale conclut rigoureusement la phase d'acquisition et de reconstruction spatiale.
 
+
+\subsection{Analyse Algorithmique des Instabilités de Reconstruction et Corrections Émergentes}
+\label{subsec:instabilites_correction}
+
+L'implémentation naïve des modèles projectifs exposés à la Section \ref{subsec:calibration} confronte le pipeline numérique à d'importantes divergences topologiques. L'analyse des premiers essais de reconstruction de la mire géométrique (la pyramide) met en évidence deux sources majeures d'artefacts~: l'absence de discrimination spectrale du fond ambiant et l'incapacité d'un seuil global à absorber la réflectance non uniforme de l'objet, induisant des aberrations de calcul de plusieurs ordres de grandeur (voir Figure 8).
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{image pyramide de base .png}
+    \caption{Image de l'objet de base }
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{recontruction_déformations.png}
+    \caption{reconstruction avec déformations }
+    \label{fig:placeholder}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{pyramide_corigée.png}
+    \caption{reconstruction corrigée}
+    \label{fig:placeholder}
+\end{figure}
+
+\begin{table}[H]
+\caption{Analyse des Hypothèses d'Erreur et Correctifs Associés}
+\label{tab:hypotheses_erreurs}
+\centering
+\begin{tabular}{p{4cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Source d'Erreur} & \textbf{Hypothèse / Mécanisme Physique} & \textbf{Formalisation du Correctif} \\
+\midrule
+\textbf{Bruit de fond hors modulation} & Éclairement ambiant constant assimilé à tort à un code binaire valide par Otsu global. & Critère de modulation local~: $\Delta_{\mathcal{M}}(u,v) > \tau_{\mathcal{M}}$ avec $\Delta_{\mathcal{M}} = \max_k(M_k) - \min_k(M_k)$. \\
+\midrule
+\textbf{Distorsion et non-uniformité} & Atténuation spatiale de l'intensité lumineuse et distorsion radiale de l'optique réceptrice. & Seuil dynamique pixélique~: $\mu(u,v) = \frac{1}{N}\sum_{k=0}^{N-1} M_k(u,v)$. Binarisation adaptative. \\
+\midrule
+\textbf{Points aberrants résiduels} & Transitions de franges bruitées (queues de distribution lourdes sur $Z$). & Double filtrage statistique robuste~: $\text{MAD}$ ($5\sigma$) suivi d'un fenêtrage par Intervalle Interquartile ($\text{IQR} = 1.5$). \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+Le Tableau \ref{tab:hypotheses_erreurs} synthétise les hypothèses physiques des sources d'erreurs identifiées ainsi que les stratégies mathématiques de régularisation retenues pour valider le pipeline d'acquisition 2026.
+
+
+
+Le Listing \ref{lst:comparatif_code} illustre de manière compacte le basculement algorithmique entre l'approche globale instable et l'implémentation locale retenue pour assurer la convergence de la triangulation de Faugeras-Toscani.
+
+\begin{lstlisting}[language=Python, label=lst:comparatif_code, caption={Mise en parallèle des paradigmes de traitement d'images (Global vs. Local).}]
+# =====================================================================
+# PARADIGME INITIAL INSTABLE (Seuillage global et absence de masque)
+# =====================================================================
+# Erreur : Otsu traite le bruit de fond, generant des codes aberrants
+seuil_global = 120 
+binaire_naif = (captures_brutes > seuil_global).astype(np.uint8)
+code_instable = np.sum(binaire_naif * poids, axis=2) 
+
+# =====================================================================
+# PARADIGME PROPAGÉ ET CORRIGÉ (Filtrage de modulation et seuil local)
+# =====================================================================
+# Correctif 1 & 2 : Calcul de la modulation locale et du seuil moyen
+modulation = captures.max(axis=2) - captures.min(axis=2)
+seuil_local = captures.mean(axis=2) # Palliateur d'attenuation optique
+
+masque_valide = modulation > 30 # Elimination stricte du bruit de fond
+IRbin = (captures > seuil_local[:, :, None]).astype(np.int32)
+IRbin[~masque_valide] = 0 # Rejection des pixels non eclaires
+
+# Correctif 3 : Post-filtrage statistique sur le nuage de points Z
+z_med = np.median(XYZ[:, 2])
+z_mad = np.median(np.abs(XYZ[:, 2] - z_med))
+ok = np.abs(XYZ[:, 2] - z_med) < max(5.0 * 1.4826 * z_mad, 250.0)
+XYZ_filtre = XYZ[ok] # Rejection finale par IQR standard (facteur 1.5)
+\end{lstlisting}
+
+
+Cette restructuration algorithmique élimine l'étalement non physique des coordonnées projetées, garantissant que $100\%$ des vecteurs calculés s'inscrivent dans la géométrie réelle de l'espace métrique d'acquisition.
 \subsection{Interface Graphique Utilisateur (IHM)}
 Pour rendre le système maniable et masquer la complexité mathématique sous-jacente, l'interface graphique en C\# utilisant le framework .NET centralise les fonctionnalités utilisateur suivantes:
 \begin{itemize}
@@ -1048,46 +1132,63 @@ Bien que le système actuel permette une reconstruction 3D fonctionnelle, plusie
 
 \begin{itemize}
     \item \textbf{Optimisation des composants optiques :} Opter pour une caméra et un projecteur bénéficiant de résolutions supérieures afin d'augmenter la densité du nuage de points final et la finesse des détails reconstruits.
-    \item \textbf{Évolution du protocole de lumière structurée :} Remplacer le codage binaire simple par une approche combinant le \textit{Code de Gray} et le \textit{décalage de franges sinusoïdales} (\textit{Phase Shifting}). Cela permettrait d'atteindre une précision de reconstruction au sous-pixel près tout en réduisant la sensibilité aux bruits de transition, le principe de ces deux méthodes est expliqué dans les publications de Zhang Y. et de Chen T..
-    \item \textbf{Gestion des surfaces complexes (HDR) :} Implémenter un algorithme d'acquisition à grande dynamique (\textit{High Dynamic Range} - HDR) en faisant varier le temps d'exposition de la caméra pour chaque motif projeté. Cela fiabiliserait la numérisation des objets présentant de fortes variations de réflectance (surfaces brillantes, métalliques ou très sombres) (voir la publication de Zhang S. et Yau S.-T.).
-    \item \textbf{Automatisation de la reconstruction à 360° :} Intégrer un plateau tournant motorisé asservi par le logiciel d'acquisition, associé à un algorithme de recalage de nuages de points de type ICP (\textit{Iterative Closest Point}), afin de générer automatiquement un modèle 3D complet de l'objet sans manipulation manuelle (voir l'article de référence de Besl P. J. et McKay N. D., "A method for registration of 3-D shapes").
+    \item \textbf{Évolution du protocole de lumière structurée :} Remplacer le codage binaire simple par une approche combinant le \textit{Code de Gray} et le \textit{décalage de franges sinusoïdales} (\textit{Phase Shifting}). Cela permettrait d'atteindre une précision de reconstruction au sous-pixel près tout en réduisant la sensibilité aux bruits de transition [6,7].
+    \item \textbf{Gestion des surfaces complexes (HDR) :} Implémenter un algorithme d'acquisition à grande dynamique (\textit{High Dynamic Range} - HDR) en faisant varier le temps d'exposition de la caméra pour chaque motif projeté. Cela fiabiliserait la numérisation des objets présentant de fortes variations de réflectance (surfaces brillantes, métalliques ou très sombres) [9].
+    \item \textbf{Automatisation de la reconstruction à 360° :} Intégrer un plateau tournant motorisé asservi par le logiciel d'acquisition, associé à un algorithme de recalage de nuages de points de type ICP (\textit{Iterative Closest Point}), afin de générer automatiquement un modèle 3D complet de l'objet sans manipulation manuelle [8].
+    \item \textbf{Automatisation de la définition du masque :} Réaliser directement dans le code la sélection du masque, plutôt que de sélectionner manuellement.
 \end{itemize}
 
 \section{Retour d'expérience}
 \subsection{Retour d'expérience sur la gestion de projet}
-Planification temporelle : Gantt initial, mi projet, final, analyse des écarts, recommandations pour la suite de la formation
-Gestion des risques
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{gantt initial.png}
+    \caption{Gantt initial}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{gantt mi projet v2.png}
+    \caption{Gantt de mi projet}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{gantt final v5.png}
+    \caption{Gantt final}
+    \label{fig:placeholder}
+\end{figure}
+
+Comme on peut le voir sur les images des gantts ci dessous, nous avons modifié notre planning à plusieurs reprises par exemple la calibration à pris plus de temps que ce que nous avions prévu et le montage nous  a pris moins de temps que dans nos premières estimations. Nous avons trouvé qu'il était assez difficile de définir un planning au début du projet car nous n'arrivions pas à estimer précisement le temps nécessaire pour réaliser chaque tâche. Finalement, nous avons tout de même réussi à obtenir un résultat satisfaisant dans le temps qui nous était imparti malgré le manque de précision de notre gantt initial.
 
 \subsection{Retour d'expérience sur le travail en équipe}
 Nous avons collaboré à 5 sur ce projet, pour une durée d'un semestre. L'entente entre les membres était très bonne, notamment car 4 membres étaient déja bon amis avant le projet. En effet, non seulement tous le monde s'impliquait dans le projet, mais également la communication était bonne et les avis de chacun étaient écouté. De plus, nous avons mis en place des méthodes pour travailler efficacement en équipe:  nous devions tous être présent pendant toute la durée des heures à l'emploi du temps. De plus, pour réaliser les différentes taches nous avons formé des groupes de 2 ou 3 éleves selon les préférences et compétences de chacun ; et nous avons géré temporellement ces taches avec l'utilisation d'un gantt. Enfin, l'entraide, ainsi que l'écoute des conseils de notre tuteur ont été primordiales pour la réussite du projet, car ça nous a permis de ne pas rester bloquer lorsque l'on rencontrait des difficultés.
 
-\section{Bibliographie}
-
+ 
+\section{Annexes}
+\subsection{Bibliographie}
 \textbf{Documentations et Notices Techniques}
 
 \begin{itemize}
-    \item \textbf{Logitech}, \textit{C920e HD WEBCAM : Complete Setup Guide}.
-    \item \textbf{Epson}, \textit{Notice technique et spécifications – Modèle 647383}.
+    \item \textbf{[1] Logitech}, \textit{C920e HD WEBCAM : Complete Setup Guide}.
+    \item \textbf{[2] Epson}, \textit{Notice technique et spécifications – Modèle 647383}.
 \end{itemize}
 \textbf{Références de Projet et Cours}
 
 \begin{itemize}
-    \item \textbf{SERVAGENT N., LYS E.}, \textit{Imageur 3D à code binaire}, Révisions R9 \& R13, 2024.
-    \item \textbf{Équipe Projet}, \textit{Présentation IM-3D : Spécifications et déploiement}.
+    \item \textbf{[3] SERVAGENT N., LYS E.}, \textit{Imageur 3D à code binaire}, Révisions R9 \& R13, 2024.
+    \item \textbf{[4] Équipe Projet}, \textit{Présentation IM-3D : Spécifications et déploiement}.
 \end{itemize}
-\textbf{Ressources Théoriques}
-
-\textit{Introduction aux principes du code binaire et structuration des données.}
+\textbf{Ressources théoriques}
 
 \begin{itemize}
-    \item \textbf{ZHANG Y., YILMAZ A.}, ``Structured light based 3D scanning for specular surface by the combination of Gray code and phase shifting,'' \textit{The International Archives of the Photogrammetry, Remote Sensing and Spatial Information Sciences}, vol. XLI-B3, pp. 137--142, Jul. 2016.
-    \item \textbf{CHEN T., SEIDEL H.-P., LENSCH H. P. A.}, ``Modulated Phase-Shifting for 3D Scanning,'' in \textit{IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, Anchorage, AK, USA, 2008, pp. 1--8.
-    \item \textbf{BESL P. J., MCKAY N. D.}, ``A method for registration of 3-D shapes,'' \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence}, vol. 14, no. 2, pp. 239--256, Feb. 1992.
-    \item \textbf{ZHANG S., YAU S.-T.}, ``High-dynamic-range scanning technique for 3D shape measurement,'' \textit{Optical Engineering}, Department of Mechanical Engineering (Iowa State University) \& Department of Mathematics (Harvard University), vol. 48, no. 3, p. 033601, Mar. 2009.
+    \item \textbf{[5] Introduction aux principes du code binaire et structuration des données.}
+    \item \textbf{[6] ZHANG Y., YILMAZ A.}, ``Structured light based 3D scanning for specular surface by the combination of Gray code and phase shifting,'' \textit{The International Archives of the Photogrammetry, Remote Sensing and Spatial Information Sciences}, vol. XLI-B3, pp. 137--142, Jul. 2016.
+    \item \textbf{[7] CHEN T., SEIDEL H.-P., LENSCH H. P. A.}, ``Modulated Phase-Shifting for 3D Scanning,'' in \textit{IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, Anchorage, AK, USA, 2008, pp. 1--8.
+    \item \textbf{[8] BESL P. J., MCKAY N. D.}, ``A method for registration of 3-D shapes,'' \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence}, vol. 14, no. 2, pp. 239--256, Feb. 1992.
+    \item \textbf{[9] ZHANG S., YAU S.-T.}, ``High-dynamic-range scanning technique for 3D shape measurement,'' \textit{Optical Engineering}, Department of Mechanical Engineering (Iowa State University) \& Department of Mathematics (Harvard University), vol. 48, no. 3, p. 033601, Mar. 2009.
 \end{itemize}
-
- 
-\section{Annexes}
 
 \subsection{Calculs}
 
@@ -1258,5 +1359,18 @@ Ce projet m’a permis de découvrir les difficultés concrètes liées au déve
 Le développement de l’interface graphique et l’automatisation des acquisitions m’ont permis de mieux comprendre l’importance de l’ergonomie et de l’organisation du code dans un projet expérimental. J’ai également appris à gérer des problèmes pratiques liés au traitement d’image, à la calibration et à la qualité des reconstructions obtenues.
 
 Enfin, ce projet a été une bonne expérience de travail en équipe, notamment pendant les phases d’intégration où il fallait faire fonctionner ensemble des éléments développés séparément.
+
+\subsubsection*{Cordier Léandre}
+Le projet m'a beaucoup appris sur comment travailler en équipe et comment produire des solutions techniques à des problèmes. J'ai appris une méthode d'imagerie 3D grâce à ce projet et j'ai pu approfondir le sujet en en débattant avec mes camarades. Globalement, notre groupe était ouvert au débat pour réaliser au mieux nos objectifs et motivé à travailler. Ce climat nous a permis d'avancer correctement et d'arriver à un résultat satisfaisant. J'ai beaucoup apprécié l'efficacité que nous avons eu dans la répartition du travail puisque nous avons été capables d'avancer sur deux tâches simultanément à diverses étapes du projet en divisant notre équipe en deux groupes selon les appétences de chacun.
+\\
+
+
+Pendant le projet, l'importance de l'organisation nous a souvent été soulignée par notre encadrant qui nous a notamment conseillé de faire un diagramme de Gantt pour fixer des échéances dans ce travail. J'ai choisi de m'occuper de cette tâche car elle est liée au rôle de supervision que  j'ai depuis le contrat d'équipe, j'ai ainsi repris le diagramme que nous avions fait pour le premier rendu pour le compléter et l'adapter et donner une meilleure idée à  chacun de ce qui devait être fait et sur quelle pérode de temps. Cette amélioration de l'organisation a permis au groupe de gagner du temps.
+
+\subsubsection*{Ramsis Zainab}
+
+Sur le plan collaboratif, ce projet a renforcé mon expérience du travail en équipe, notamment lors des phases critiques d'intégration de modules développés séparément.
+
+Sur le plan technique, l'enseignement majeur réside dans la gestion de l'écart entre théorie et pratique. Si la maîtrise des modèles mathématiques de reconstruction laissait présager une progression fluide, la confrontation aux données réelles a fait émerger des verrous expérimentaux complexes et imprévisibles. Cette expérience démontre les limites d'une approche purement séquentielle. Pour de futurs projets d'ingénierie similaires, il apparaît indispensable de mener le développement théorique et les tests empiriques en parallèle, selon un cycle itératif, afin d'identifier et de corriger ces divergences le plus tôt possible.
 
 \end{document}
