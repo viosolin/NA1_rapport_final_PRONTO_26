@@ -1152,6 +1152,29 @@ Nous avons collaboré à 5 sur ce projet, pour une durée d'un semestre. L'enten
     \item \textbf{[9] ZHANG S., YAU S.-T.}, ``High-dynamic-range scanning technique for 3D shape measurement,'' \textit{Optical Engineering}, Department of Mechanical Engineering (Iowa State University) \& Department of Mathematics (Harvard University), vol. 48, no. 3, p. 033601, Mar. 2009.
 \end{itemize}
 
+\subsection{Bonus : gestion de la couleur}
+
+En complément de la reconstruction géométrique, une fonctionnalité de colorisation du nuage de points a été ajoutée. Le principe consiste à capturer une image couleur de l'objet après la séquence de franges, puis à associer à chaque point 3D reconstruit la couleur du pixel caméra correspondant. La visualisation 3D peut ainsi afficher soit une coloration par hauteur, utile pour lire le relief, soit une coloration réaliste issue de l'image couleur.
+
+Cette amélioration a été testée sur un bidon gris. L'image couleur sert de référence visuelle de l'objet réel, tandis que la reconstruction montre que les points 3D conservent les teintes observées par la caméra.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{image_couleur_bidon.png}
+        \caption{Image couleur du bidon gris}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{reconstruction_couleur_bidon.png}
+        \caption{Reconstruction 3D colorisée}
+    \end{subfigure}
+    \caption{Exemple de reconstruction avec association de couleur aux points 3D}
+    \label{fig:bonus_couleur_bidon}
+\end{figure}
+
 \subsection{Calculs}
 
 \subsection{Codes}
