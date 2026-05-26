@@ -560,7 +560,7 @@ binaire_naif = (captures_brutes > seuil_global).astype(np.uint8)
 code_instable = np.sum(binaire_naif * poids, axis=2) 
 
 # =====================================================================
-# PARADIGME PROPAGÉ ET CORRIGÉ (Filtrage de modulation et seuil local)
+# PARADIGME PROPAGE ET CORRIGE (Filtrage de modulation et seuil local)
 # =====================================================================
 # Correctif 1 & 2 : Calcul de la modulation locale et du seuil moyen
 modulation = captures.max(axis=2) - captures.min(axis=2)
@@ -810,58 +810,21 @@ Voici les images brutes que nous avons obtenues pour la reconstruction de trois 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\linewidth]{1.png}
-    \caption{Franges détectées sur l'Image 1}
-    \label{fig:franges1}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{2.png}
-    \caption{Franges détectées sur l'Image 2}
-    \label{fig:franges2}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{3.png}
-    \caption{Franges détectées sur l'Image 3}
-    \label{fig:franges3}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{4.png}
-    \caption{Franges détectées sur l'Image 4}
-    \label{fig:franges4}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{5.png}
-    \caption{Franges détectées sur l'Image 5}
-    \label{fig:franges5}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{6.png}
-    \caption{Franges détectées sur l'Image 6}
-    \label{fig:franges6}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{7.png}
-    \caption{Franges détectées sur l'Image 7}
-    \label{fig:franges7}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{8.png}
-    \caption{Franges détectées sur l'Image 8}
-    \label{fig:franges8}
+    \setlength{\tabcolsep}{2pt}
+    \begin{tabular}{cccc}
+        \includegraphics[width=0.24\linewidth]{1.png} &
+        \includegraphics[width=0.24\linewidth]{2.png} &
+        \includegraphics[width=0.24\linewidth]{3.png} &
+        \includegraphics[width=0.24\linewidth]{4.png} \\
+        \small Image 1 & \small Image 2 & \small Image 3 & \small Image 4 \\[0.2cm]
+        \includegraphics[width=0.24\linewidth]{5.png} &
+        \includegraphics[width=0.24\linewidth]{6.png} &
+        \includegraphics[width=0.24\linewidth]{7.png} &
+        \includegraphics[width=0.24\linewidth]{8.png} \\
+        \small Image 5 & \small Image 6 & \small Image 7 & \small Image 8
+    \end{tabular}
+    \caption{Validation visuelle des franges détectées sur les huit images projetées.}
+    \label{fig:franges_detectees}
 \end{figure}
 On constate ainsi que la détection des franges est correcte pour les 7 premières images, mais beaucoup plus difficile pour la 8ième probablement à cause du fait que la fréquence était très élevée et donc que les franges étaient petites sur l'images. Pour cette raison nous avons décidé de ne retenir que les 7 premières images pour effectuer la reconstruction des objets
     
