@@ -142,11 +142,11 @@ permettant la reconstruction tridimensionnelle par triangulation.
 \subsection{Objectifs}
 
 L'objectif de ce projet est l’étude et la réalisation d’un imageur tridimensionnel pour objets de grandes tailles.
-Le projet sera réalisé en deux étapes : dans un premier temps nous avons fait une étude théorique ainsi qu'une simulation numérique afin d'établir les relations mathématiques et de créer les codes de traitement des images. Puis nous avons réaliser un système physique (avec un projecteur et une caméra), et créé une interface graphique. Nous voulions aussi imprimer en 3D l’objet reconstruit à échelle réduite.
+Le projet sera réalisé en deux étapes : dans un premier temps nous avons fait une étude théorique ainsi qu'une simulation numérique afin d'établir les relations mathématiques et de créer les codes de traitement des images. Puis nous avons réalisé un système physique (avec un projecteur et une caméra), et créé une interface graphique. Nous voulions aussi imprimer en 3D l'objet reconstruit à échelle réduite.
 
 Notre capteur doit être en mesure de mesurer de grands objets de $1$ à $4\,m^2$ avec une résolution minimale de $ 1$ mm.
 De plus, la mesure se fera sans contact, avec la projection d'une série d'image sur un objet, et la mesure des rayons réfléchis.
-Enfin, la calibration du capteur devra se faire de manière automatique à partir d'images prisent sur un damier. 
+Enfin, la calibration du capteur devra se faire de manière automatique à partir d'images prises sur un damier. 
 
 \begin{figure}[H]
 \centering
@@ -285,7 +285,7 @@ Enfin, la calibration du capteur devra se faire de manière automatique à parti
 L'émetteur et le récepteur nous ont été fournis, la caméra est une Webcam C920E [1] et le projecteur est un EPSON EB-W49[2].
 Au début du projet nous avions des éléments laissés par les équipes des années précédentes tels que :
 \begin{itemize}
-    \item Un support pour l'émetteur et le récepteur avec deux parties tournantes, du côté émetteur la hauteur du support peut être modifiées avec trois pieds réglables, une roue avec  des mesures d'angles est placée sous la caméra nous permettant d'avoir un ordre de grandeur de l'angle de la caméra, et côté projecteur l'inclinaison est réglable grâce à un boulon à l'arrière de la planche supportant l'émetteur. 
+    \item Un support pour l'émetteur et le récepteur avec deux parties tournantes. Du côté émetteur, la hauteur du support peut être modifiée avec trois pieds réglables. Une roue avec des mesures d'angles est placée sous la caméra, ce qui nous permet d'avoir un ordre de grandeur de l'angle de la caméra. Côté projecteur, l'inclinaison est réglable grâce à un boulon à l'arrière de la planche supportant l'émetteur. 
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.75\linewidth]{projecteur_sur_support.jpg}
@@ -298,7 +298,7 @@ Au début du projet nous avions des éléments laissés par les équipes des ann
     \caption{Caméra sur le support}
     \label{fig:placeholder}
 \end{figure}
-    \item Des éléments de volumes en polystyrène extrudé nous étaient également fournis, nottament un plan avec un damier noir et blanc utile et la calibration, et d'autre volume comme une pyramide ou logo des Écoles des Mines utilent afin de tester les capacités de reconstruction de notre projet
+    \item Des éléments de volumes en polystyrène extrudé nous étaient également fournis, notamment un plan avec un damier noir et blanc utile à la calibration, et d'autres volumes comme une pyramide ou le logo des Écoles des Mines, utiles afin de tester les capacités de reconstruction de notre projet.
 \end{itemize}
 \begin{figure}[H]
     \centering
@@ -329,7 +329,7 @@ Le processus d'acquisition doit garantir la parfaite synchronisation entre le vi
 \subsection{Traitement du signal et binarisation dynamique}
 Pour passer de l'image brute à une matrice logique exploitable, les fonctionnalités suivantes de nettoyage des données sont appliquées :
 \begin{itemize}
-    \item \textbf{Filtrage du bruit :} Application d'un filtre spatial basse-bas pour éliminer le bruit haute fréquence inhérent au capteur de la caméra.
+    \item \textbf{Filtrage du bruit :} Application d'un filtre spatial passe-bas pour éliminer le bruit haute fréquence inhérent au capteur de la caméra.
     \item \textbf{Seuillage adaptatif :} Afin de contrer les variations d'albédo de l'objet ou la dispersion de l'énergie lumineuse due au recul important du projecteur, le logiciel calcule dynamiquement un seuil optimal (méthode de maximisation de la variance inter-classe). Cela permet de séparer fidèlement les zones éclairées (1) des zones sombres (0), même sur des objets de géométrie complexe ou de couleur sombre.
     \item \textbf{Masque manuel}
     Afin de faciliter le traitement des images via nos codes, nous avons choisi d'appliquer manuellement un masque autour de celles-ci. Cette étape est détaillée \hyperref[ici]{ici}
@@ -401,7 +401,7 @@ Cette convolution temporelle discrète projette l'ensemble des images 2D vers un
 
 \begin{lstlisting}[language=Python, label=lst:binarization_code, caption={Algorithme de binarisation dynamique locale et de décodage des codes de franges.}]
 def binariser_franges(captures: np.ndarray, masque: np.ndarray) -> np.ndarray:
-    # Analyse locale du contraste pour pallier les defauts d'unseuil global
+    # Analyse locale du contraste pour pallier les defauts d'un seuil global
     image_max = captures.max(axis=0).astype(np.float32)
     image_min = captures.min(axis=0).astype(np.float32)
     seuil = (image_max + image_min) * 0.5
@@ -506,13 +506,13 @@ L'implémentation naïve des modèles projectifs exposés à la Section \ref{sub
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\linewidth]{image pyramide de base .png}
-    \caption{Image de l'objet de base }
+    \caption{Image de l'objet de base}
     \label{fig:placeholder}
 \end{figure}
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{recontruction_déformations.png}
-    \caption{reconstruction avec déformations }
+    \caption{Reconstruction avec déformations}
     \label{fig:placeholder}
 \end{figure}
 
@@ -520,7 +520,7 @@ L'implémentation naïve des modèles projectifs exposés à la Section \ref{sub
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\linewidth]{pyramide_corigée.png}
-    \caption{reconstruction corrigée}
+    \caption{Reconstruction corrigée}
     \label{fig:placeholder}
 \end{figure}
 
@@ -628,7 +628,7 @@ L'objectif de la création de l'interface graphique est de simplifier au maximum
     \item L'utilisateur doit avoir un retour de la caméra pour être capable de cadrer l'objet.
     \item Il doit pouvoir lancer la calibration manuellement et avoir un retour sur le fonctionnement.
     \item L'utilisateur doit être capable de voir la reconstruction de l'objet.
-    \item Il doit pouvoir déterminer manuellement le nombre d'images à prendre .
+    \item Il doit pouvoir déterminer manuellement le nombre d'images à prendre.
     \item L'utilisateur doit pouvoir enregistrer les résultats facilement.
 \end{itemize}
 Nous avons choisi de coder l'interface en C\# en utilisant le framework .NET sur visual studio car le framework est simple d'utilisation et qu'un membre de notre équipe l'avait déjà utilisé.
@@ -638,7 +638,7 @@ L'objectif de la création du support est de simplifier au maximum les différen
 \begin{itemize}
     \item L'insertion du damier dans le support doit être simple et rapide.
     \item Une fois inséré, le support doit être parfaitement stable.
-    \item L'écart entre les deux postions du support doit être exactement de 10 cm.
+    \item L'écart entre les deux positions du support doit être exactement de 10 cm.
 \end{itemize}
 Nous avons choisi de réaliser le support en utilisant le logiciel fusion 360, pour pouvoir ensuite l'imprimer en 3D.
 
@@ -658,7 +658,7 @@ Nous avons choisi de réaliser le support en utilisant le logiciel fusion 360, p
 
 Nous avons commencé à faire l'interface graphique assez tôt car nous terminions en parallèle les codes de reconstruction d'objet et de calibration . Lors du développement nous avons fait certains choix, nous avons mis un slider pour que l'utilisateur puisse choisir le nombre d'image à prendre simplement.
 \\ Lors de nos premiers essais nous avons eu des difficultés avec la caméra car du scientillement aparaissait sur les images de la caméra, nous avons donc rajouter du codes pour avoir accès aux paramètres de la caméra depuisl'interface graphique, ce qui nous permet d'ajuster les paramètres de la caméra grâce au retour avant de commencer les expérimentations.
-\\Nous avons aussi fait des programmes python pour faire des images des franges à projetter avec l'émetteur, et avons implémenté dans l'interface la projection automatique de ces images pour accélérer la capture des images.
+\\Nous avons aussi fait des programmes Python pour générer des images de franges à projeter avec l'émetteur, et avons implémenté dans l'interface la projection automatique de ces images pour accélérer la capture des images.
 \\Pour enregistrer les différentes images nous avons choisi d'utiliser des dossiers zip.
 
 \subsection{Cache image}
@@ -693,7 +693,7 @@ Pour faciliter la mise en place du cache, nous avons choisi de le fixer lors de 
 \section{Intégration et validation}
 \subsection{Interface graphique}
 Lors du développement de l'interface nous avons rapidement testé les fonctionnalités liées à la caméra et au projecteur, car nous avons considérés ces fonctions comme les plus importantes. Une fois que le retour caméra et la projection ont été validé nous avons pu vérifier l'enregistrement pour nous assuré que l'interface soit utilisable.
-\\Une fois l'interface fonctionnelle nous l'avons utilisée pendant toutes les étapes suivantes du projet ce qui nous permis de gagner du temps sur les calibrations et les enregistrements d'images.
+\\Une fois l'interface fonctionnelle, nous l'avons utilisée pendant toutes les étapes suivantes du projet, ce qui nous a permis de gagner du temps sur les calibrations et les enregistrements d'images.
 
 \subsection{Validation de la calibration}
 Valider la calibration suppose deux étapes : vérifier dans un premier temps que les quadrillages présents sur les 4 images de calibrations sont bien détectés, et ensuite s'assurer de la pertinence des matrices de calibration.
@@ -781,7 +781,7 @@ Sur cet essai, l'erreur moyenne de reprojection est de $0{,}69$ pixel pour le r�
 \subsection{Validation de la reconstruction}
 De même, valider la reconstruction suppose également deux étapes : vérifier que les franges sur les images de l'objet sont bien identifiées par notre algorithme, puis vérifier que l'objet reconstruit correspond bien à l'objet réel.
 
-Voici les images brutes que nous avons obtenues pour la reconstruction de trois objets, respectivement le plan, la pyramide et le bras. Ayant choisit N=8 nous avons 8 images par objets : 
+Voici les images brutes que nous avons obtenues pour la reconstruction de trois objets, respectivement le plan, la pyramide et le bras. Ayant choisi $N=8$, nous avons 8 images par objet : 
 
 \begin{figure}[H]
     \centering
@@ -825,7 +825,7 @@ Voici les images brutes que nous avons obtenues pour la reconstruction de trois 
     \caption{Validation visuelle des franges détectées sur les huit images projetées.}
     \label{fig:franges_detectees}
 \end{figure}
-On constate ainsi que la détection des franges est correcte pour les 7 premières images, mais beaucoup plus difficile pour la 8ième probablement à cause du fait que la fréquence était très élevée et donc que les franges étaient petites sur l'images. Pour cette raison nous avons décidé de ne retenir que les 7 premières images pour effectuer la reconstruction des objets
+On constate ainsi que la détection des franges est correcte pour les 7 premières images, mais beaucoup plus difficile pour la 8\ieme{}, probablement parce que la fréquence était très élevée et que les franges étaient petites sur l'image. Pour cette raison, nous avons décidé de ne retenir que les 7 premières images pour effectuer la reconstruction des objets.
     
     \item Pour confirmer que la reconstruction était fonctionnelle nous avons tenté de reconstruire différents objets parmi ceux qui nous ont été fournis. Nous avons commencé par utiliser un simple plan. Les premiers essais n'ont pas été fructueux car la reconstruction était courbée car la partie reconnaissance des points ne prenait pas les points dans le bon ordre.
 \begin{figure}[H]
@@ -950,7 +950,7 @@ L'ensemble des visualisations est regroupé sur la page d'accueil des reconstruc
     \end{center}
 \end{itemize}
 
-Après avoir observé ces différents résultats de reconstruction, nous avons cherché à vérifier plus précisément que la déformation observée sur le plan ne se retrouvait plus sur les objets reconstruits. Pour cela, nous avons contrôlé les proportions du premier étage de la pyramide directement dans le logiciel de visualisation. La valeur de 4,6 cm indiquée sur la figure correspond à une mesure manuelle réalisée dans cet outil, utilisée comme repère relatif pour comparer les côtés entre eux, et non à la dimension physique réelle de l'objet.  Nous avons mesuré la pyramide réelle les côtés font 29,7 et 29,2 cm cette différence est de l'ordre de 2\% ce qui n'est pas détectable sur la modélisation à cause du changement d'échelle, donc la base apparait carré ce qui est normal et confirme que les proportion sont bien conservées.
+Après avoir observé ces différents résultats de reconstruction, nous avons cherché à vérifier plus précisément que la déformation observée sur le plan ne se retrouvait plus sur les objets reconstruits. Pour cela, nous avons contrôlé les proportions du premier étage de la pyramide directement dans le logiciel de visualisation. La valeur de 4,6 cm indiquée sur la figure correspond à une mesure manuelle réalisée dans cet outil, utilisée comme repère relatif pour comparer les côtés entre eux, et non à la dimension physique réelle de l'objet. Nous avons mesuré la pyramide réelle : les côtés font 29,7 et 29,2 cm. Cette différence est de l'ordre de 2\%, ce qui n'est pas détectable sur la modélisation à cause du changement d'échelle. La base apparaît donc carrée, ce qui est normal et confirme que les proportions sont bien conservées.
 
 \begin{figure}[H]
     \centering
@@ -1013,19 +1013,19 @@ Objectif : Initialiser le système d'imagerie 3D et calibrer le couple caméra-p
 
     \item{Étape 4 : Capture de la deuxième image de la mire (Damier)}
     \begin{itemize}
-        \item{Action : L'utilisateur place le damier de calibration dans la position proche des supports de calibration, puis  clique sur le bouton "Image 2" de l'interface.}
+        \item{Action : L'utilisateur place le damier de calibration dans la position proche des supports de calibration, puis clique sur le bouton "Image 2" de l'interface.}
         \item{Résultat attendu : Le logiciel fige la deuxième image, détecte automatiquement les coins du damier et valide la capture de la deuxième image.}
     \end{itemize}
 
     \item{Étape 5 : Capture de la première image de la mire projetée}
     \begin{itemize}
-        \item{Action : L'utilisateur projette le damier de calibration sur le plan une fois placé dans la postion lointaine des supports de calibration, puis clique sur le bouton "Image 3" de l'interface.}
+    \item{Action : L'utilisateur projette le damier de calibration sur le plan une fois placé dans la position lointaine des supports de calibration, puis clique sur le bouton "Image 3" de l'interface.}
         \item{Résultat attendu : Le logiciel fige l'image, détecte automatiquement les coins du damier projeté et valide la capture de la première image du damier projeté.}
     \end{itemize}
 
-    \item{Étape 6 : Capture de la deucième image de la mire projetée}
+    \item{Étape 6 : Capture de la deuxième image de la mire projetée}
     \begin{itemize}
-        \item{Action : L'utilisateur place le plan sur lequel est projeté le damier dans la position proche des supports de calibration, puis  clique sur le bouton "Image 4" de l'interface.}
+        \item{Action : L'utilisateur place le plan sur lequel est projeté le damier dans la position proche des supports de calibration, puis clique sur le bouton "Image 4" de l'interface.}
         \item{Résultat attendu : Le logiciel fige l'image, détecte automatiquement les coins du damier projeté et valide la capture de la deuxième image du damier projeté.}
     \end{itemize}
 \end{itemize}
@@ -1057,7 +1057,7 @@ Objectif : Scanner un objet en relief en projetant une séquence de motifs binai
 \begin{itemize}
 \item{Étape 7 : Acquisition des données par code binaire}
 \begin{itemize}
-    \item{Action : L'utilisateur laisse le plan, positionne l'objet à numériser dans la zone de travail, puis clique sur le bouton "Lancer acquisition"  depuis l'interface graphique.}
+\item{Action : L'utilisateur laisse le plan, positionne l'objet à numériser dans la zone de travail, puis clique sur le bouton "Lancer acquisition" depuis l'interface graphique.}
 
     \item{Résultat attendu : Le projecteur projette automatiquement une séquence de motifs binaires (lignes noires et blanches) sur l'objet, tandis que la caméra synchronise la capture de la suite d'images.}
 \end{itemize}
@@ -1122,10 +1122,10 @@ Bien que le système actuel permette une reconstruction 3D fonctionnelle, plusie
     \label{fig:placeholder}
 \end{figure}
 
-Comme on peut le voir sur les images des gantts ci dessous, nous avons modifié notre planning à plusieurs reprises par exemple la calibration à pris plus de temps que ce que nous avions prévu et le montage nous  a pris moins de temps que dans nos premières estimations. Nous avons trouvé qu'il était assez difficile de définir un planning au début du projet car nous n'arrivions pas à estimer précisement le temps nécessaire pour réaliser chaque tâche. Finalement, nous avons tout de même réussi à obtenir un résultat satisfaisant dans le temps qui nous était imparti malgré le manque de précision de notre gantt initial.
+Comme on peut le voir sur les images des Gantt ci-dessous, nous avons modifié notre planning à plusieurs reprises. Par exemple, la calibration a pris plus de temps que ce que nous avions prévu et le montage nous a pris moins de temps que dans nos premières estimations. Nous avons trouvé qu'il était assez difficile de définir un planning au début du projet car nous n'arrivions pas à estimer précisément le temps nécessaire pour réaliser chaque tâche. Finalement, nous avons tout de même réussi à obtenir un résultat satisfaisant dans le temps qui nous était imparti malgré le manque de précision de notre Gantt initial.
 
 \subsection{Retour d'expérience sur le travail en équipe}
-Nous avons collaboré à 5 sur ce projet, pour une durée d'un semestre. L'entente entre les membres était très bonne, notamment car 4 membres étaient déja bon amis avant le projet. En effet, non seulement tous le monde s'impliquait dans le projet, mais également la communication était bonne et les avis de chacun étaient écouté. De plus, nous avons mis en place des méthodes pour travailler efficacement en équipe:  nous devions tous être présent pendant toute la durée des heures à l'emploi du temps. De plus, pour réaliser les différentes taches nous avons formé des groupes de 2 ou 3 éleves selon les préférences et compétences de chacun ; et nous avons géré temporellement ces taches avec l'utilisation d'un gantt. Enfin, l'entraide, ainsi que l'écoute des conseils de notre tuteur ont été primordiales pour la réussite du projet, car ça nous a permis de ne pas rester bloquer lorsque l'on rencontrait des difficultés.
+Nous avons collaboré à 5 sur ce projet, pour une durée d'un semestre. L'entente entre les membres était très bonne, notamment car 4 membres étaient déjà bons amis avant le projet. En effet, non seulement tout le monde s'impliquait dans le projet, mais la communication était également bonne et les avis de chacun étaient écoutés. De plus, nous avons mis en place des méthodes pour travailler efficacement en équipe : nous devions tous être présents pendant toute la durée des heures à l'emploi du temps. Pour réaliser les différentes tâches, nous avons formé des groupes de 2 ou 3 élèves selon les préférences et compétences de chacun ; et nous avons géré temporellement ces tâches avec l'utilisation d'un Gantt. Enfin, l'entraide, ainsi que l'écoute des conseils de notre tuteur, ont été primordiales pour la réussite du projet, car cela nous a permis de ne pas rester bloqués lorsque nous rencontrions des difficultés.
 
  
 \section{Annexes}
@@ -1334,7 +1334,7 @@ Le projet fut très instructif, j'ai beaucoup appris sur le plan technique et hu
 
     Nous avons rencontré un problème pendant la phase de calibration, nous déplacions le damier à la main. C'était beaucoup trop approximatif et cela faussait la précision de nos mesures. Pour régler ce problème, j'ai conçu et imprimé en 3D un système de supports spécifiques. L'idée est d'en placer deux de chaque côté du damier pour bien le caler. J'ai configuré ces supports avec deux positions fixes, une arrière et une avant, qui bloquent complètement les mouvements de rotation ou les écarts sur les côtés. Cela permet de faire glisser le damier d'une position à l'autre pour obtenir une translation parfaite de 10 centimètres vers l'avant. Grâce à cela, nous avons supprimé l'erreur humaine : le mouvement est devenu 100\% répétable et le déplacement lors de la calibration est maintenant d'une précision parfaite.
 \subsubsection*{Jullière Thomas}
-Ce projet était un bon exercice de travail en équipe sur un projet plutôt complexe. Il m'a permis de développer mes capacités de travail en équipe et également le coté informatique était interessant avec la manipulation de divers logiciels. 
+Ce projet était un bon exercice de travail en équipe sur un projet plutôt complexe. Il m'a permis de développer mes capacités de travail en équipe, et le côté informatique était également intéressant avec la manipulation de divers logiciels. 
 
 \subsubsection*{Rannou Mathieu}
 Ce projet m’a permis de découvrir les difficultés concrètes liées au développement d’un système de reconstruction 3D complet, depuis la calibration jusqu’à la visualisation finale des résultats. J’ai principalement travaillé sur les aspects logiciels et sur l’intégration des différentes parties du projet afin d’obtenir une chaîne de reconstruction fonctionnelle et simple à utiliser.
@@ -1348,7 +1348,7 @@ Le projet m'a beaucoup appris sur comment travailler en équipe et comment produ
 \\
 
 
-Pendant le projet, l'importance de l'organisation nous a souvent été soulignée par notre encadrant qui nous a notamment conseillé de faire un diagramme de Gantt pour fixer des échéances dans ce travail. J'ai choisi de m'occuper de cette tâche car elle est liée au rôle de supervision que  j'ai depuis le contrat d'équipe, j'ai ainsi repris le diagramme que nous avions fait pour le premier rendu pour le compléter et l'adapter et donner une meilleure idée à  chacun de ce qui devait être fait et sur quelle pérode de temps. Cette amélioration de l'organisation a permis au groupe de gagner du temps.
+Pendant le projet, l'importance de l'organisation nous a souvent été soulignée par notre encadrant, qui nous a notamment conseillé de faire un diagramme de Gantt pour fixer des échéances dans ce travail. J'ai choisi de m'occuper de cette tâche car elle est liée au rôle de supervision que j'ai depuis le contrat d'équipe. J'ai ainsi repris le diagramme que nous avions fait pour le premier rendu pour le compléter, l'adapter et donner une meilleure idée à chacun de ce qui devait être fait et sur quelle période de temps. Cette amélioration de l'organisation a permis au groupe de gagner du temps.
 
 \subsubsection*{Ramsis Zainab}
 
